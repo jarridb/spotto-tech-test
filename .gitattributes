@@ -1,0 +1,15 @@
+# Normalize all text files to LF on commit, convert to native on checkout
+* text=auto
+
+# Force LF for specific file types
+*.sh text eol=lf
+*.yml text eol=lf
+*.js text eol=lf
+
+# Force CRLF for specific file types
+*.bat text eol=crlf
+
+# Treat certain files as binary
+*.jpg binary
+*.png binary
+*.pdf binary

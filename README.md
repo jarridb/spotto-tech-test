@@ -1,0 +1,1 @@
+# Spotto Technical Assessment: Cloud Resource Tagging System
