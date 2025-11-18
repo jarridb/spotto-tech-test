@@ -15,3 +15,10 @@
 **Tool:** Claude
 **Result:** updated Readme.md
 **Time Saved:** ~1 hour
+
+### 2. Datamodel
+
+**Prompt:** 'Based on the seed data and the how add data models to spec.md'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~1 hour

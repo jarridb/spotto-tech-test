@@ -24,6 +24,8 @@ After looking at hte data I would see that the things a finops would look for in
 3. per tag - which resources have each tag
 4. cost-weighted - what % of spend is properly tagged
 
+## What we are building
+
 ### Seed data
 
 Create an initial dataset with 20 mock resources. Here's the JSON structure to use:
@@ -278,6 +280,375 @@ Create an initial dataset with 20 mock resources. Here's the JSON structure to u
   }
 ]
 ```
+
+### Data models
+
+This section defines all data models used throughout the application. Models are based on the seed data structure and requirements for the dashboard and resource management features.
+
+**Model Categories:**
+
+- **Core Models**: Resource, Tags, TagSchema - fundamental data structures
+- **Coverage Models**: TagCoverage, CoverageStats - dashboard metrics and calculations
+- **API Models**: Request/Response interfaces for API endpoints
+- **Utility Models**: Filter, Sort, Validation - supporting data structures
+
+### Enums
+
+```typescript
+enum Provider {
+  Azure = 'Azure',
+  AWS = 'AWS',
+  GCP = 'GCP',
+}
+
+enum ResourceType {
+  VirtualMachine = 'Virtual Machine',
+  SQLDatabase = 'SQL Database',
+  StorageAccount = 'Storage Account',
+  CDN = 'CDN',
+  PostgreSQLDatabase = 'PostgreSQL Database',
+  RedisCache = 'Redis Cache',
+  MongoDBDatabase = 'MongoDB Database',
+  MySQLDatabase = 'MySQL Database',
+}
+
+enum Environment {
+  Production = 'Production',
+  Staging = 'Staging',
+  Development = 'Development',
+  Testing = 'Testing',
+}
+
+enum BusinessUnit {
+  Engineering = 'Engineering',
+  Sales = 'Sales',
+  Marketing = 'Marketing',
+  Finance = 'Finance',
+  Operations = 'Operations',
+}
+```
+
+### Tag Types
+
+```typescript
+// Shared tag definition - single source of truth for FE and BE
+// Both frontend and backend import from shared/types/tag.ts
+
+// Define valid values for enum-type tags
+type EnvironmentValue = 'Production' | 'Staging' | 'Development' | 'Testing';
+type BusinessUnitValue = 'Engineering' | 'Sales' | 'Marketing' | 'Finance' | 'Operations';
+
+// Unified tags type - works for both JSON (API) and internal use
+// All values are strings (as they appear in JSON), but TypeScript enforces valid enum values
+type Tags = Partial<{
+  Environment: EnvironmentValue;
+  Owner: string;
+  BusinessUnit: BusinessUnitValue;
+  CostCenter: string;
+  Project: string;
+  Customer: string;
+}>;
+
+// Tag key type
+type TagKey = keyof Tags;
+
+// Individual tag with type safety
+type Tag<K extends TagKey = TagKey> = {
+  key: K;
+  value: Tags[K];
+};
+```
+
+### Resource
+
+```typescript
+/**
+ * Core resource model representing a cloud resource
+ * Based on the seed data structure with 20 mock resources
+ */
+interface Resource {
+  // Unique identifier for the resource (e.g., "vm-prod-web-001")
+  id: string;
+
+  // Human-readable name (e.g., "web-server-prod-east")
+  name: string;
+
+  // Resource type from ResourceType enum
+  type: ResourceType;
+
+  // Cloud provider from Provider enum
+  provider: Provider;
+
+  // Region where the resource is deployed (e.g., "eastus", "us-west-2", "global")
+  region: string;
+
+  // Monthly cost in USD (e.g., 245.5)
+  monthlyCost: number;
+
+  // Tags object containing key-value pairs
+  // Can be empty object {} if no tags are present
+  tags: Tags;
+}
+
+/**
+ * Example resource from seed data:
+ * {
+ *   id: "vm-prod-web-001",
+ *   name: "web-server-prod-east",
+ *   type: "Virtual Machine",
+ *   provider: "Azure",
+ *   region: "eastus",
+ *   monthlyCost: 245.5,
+ *   tags: {
+ *     Environment: "Production",
+ *     Owner: "platform-team"
+ *   }
+ * }
+ */
+```
+
+### API Response Models
+
+```typescript
+/**
+ * Response model for resource list endpoint
+ * Includes resources with tag coverage information
+ */
+interface ResourceListResponse {
+  resources: ResourceWithCoverage[];
+  total: number;
+}
+
+/**
+ * Response model for single resource endpoint
+ */
+interface ResourceDetailResponse {
+  resource: Resource;
+}
+
+/**
+ * Response model for coverage endpoint
+ */
+interface CoverageResponse {
+  coverage: TagCoverage;
+}
+
+/**
+ * Response model for tag schema endpoint
+ */
+interface TagSchemaResponse {
+  schema: TagSchemaDefinition;
+}
+
+/**
+ * Bulk tag operation request
+ */
+interface BulkTagRequest {
+  resourceIds: string[]; // Array of resource IDs to update
+  tagsToAdd: Tags; // Tags to add/update
+  tagsToRemove?: TagKey[]; // Optional: tag keys to remove
+}
+
+/**
+ * Bulk tag operation preview
+ * Shows what changes will be made before applying
+ */
+interface BulkTagPreview {
+  items: BulkTagPreviewItem[];
+  summary: {
+    totalResources: number;
+    resourcesToUpdate: number;
+    tagsToAdd: number;
+    tagsToRemove: number;
+  };
+}
+
+interface BulkTagPreviewItem {
+  resourceId: string;
+  resourceName: string;
+  newTags: Tags;
+  existingTags: Tags;
+}
+
+/**
+ * Bulk tag operation response
+ */
+interface BulkTagResponse {
+  success: boolean;
+  updated: number; // Number of resources successfully updated
+  errors?: BulkOperationError[]; // Errors for resources that failed to update
+}
+
+/**
+ * Single resource tag update request
+ */
+interface UpdateResourceTagsRequest {
+  tags: Tags; // Complete tags object (will replace existing tags)
+}
+
+/**
+ * Single resource tag update response
+ */
+interface UpdateResourceTagsResponse {
+  resource: Resource;
+}
+
+/**
+ * Filter options for resource list
+ */
+interface ResourceFilterOptions {
+  provider?: Provider[]; // Filter by one or more providers
+  type?: ResourceType[]; // Filter by one or more resource types
+  region?: string[]; // Filter by one or more regions (dynamically populated from resources)
+  environment?: EnvironmentValue[]; // Filter by environment tag values
+  compliant?: boolean; // Filter by compliance status
+}
+
+/**
+ * Sort options for resource list
+ */
+interface ResourceSortOptions {
+  field: 'name' | 'provider' | 'type' | 'monthlyCost' | 'tagCoverage';
+  direction: 'asc' | 'desc';
+}
+
+/**
+ * Query parameters for resource list endpoint
+ */
+interface ResourceListQueryParams {
+  filter?: ResourceFilterOptions;
+  sort?: ResourceSortOptions;
+  limit?: number; // For future pagination support
+  offset?: number; // For future pagination support
+}
+```
+
+### Tag Schema
+
+```typescript
+interface TagSchema {
+  key: TagKey;
+  required: boolean;
+  allowedValues?: readonly string[]; // For enum types like Environment, BusinessUnit
+}
+
+interface TagSchemaDefinition {
+  required: TagSchema[];
+  optional: TagSchema[];
+}
+```
+
+### Tag Coverage Metrics
+
+```typescript
+/**
+ * Main coverage metrics interface returned by the coverage API endpoint
+ * Used by the dashboard to display tag compliance statistics
+ */
+interface TagCoverage {
+  // Overall compliance metrics
+  overallCompliance: number; // percentage of resources that are compliant (0-100)
+  compliantResources: number; // count of compliant resources
+  totalResources: number; // total count of resources
+
+  // Per-tag coverage percentages
+  // Maps tag key (e.g., 'Environment', 'Owner') to percentage of resources with that tag
+  perTagCoverage: Record<string, number>; // tag key -> percentage (0-100)
+
+  // Cost-weighted coverage metrics
+  costWeightedCompliance: number; // percentage of cost that is properly tagged (0-100)
+  compliantCost: number; // total monthly cost of compliant resources
+  totalCost: number; // total monthly cost of all resources
+
+  // Breakdown statistics by different dimensions
+  breakdownByProvider: Record<string, CoverageStats>; // provider name -> stats
+  breakdownByType: Record<string, CoverageStats>; // resource type -> stats
+  breakdownByEnvironment: Record<string, CoverageStats>; // environment value -> stats
+}
+
+/**
+ * Coverage statistics for a group of resources
+ * Used in breakdowns by provider, type, environment, etc.
+ */
+interface CoverageStats {
+  compliant: number; // count of compliant resources in this group
+  total: number; // total count of resources in this group
+  percentage: number; // compliance percentage for this group (0-100)
+}
+
+/**
+ * Resource with tag coverage information
+ * Used in resource list views to display coverage badge
+ */
+interface ResourceWithCoverage extends Resource {
+  tagCoverage: number; // percentage of required tags present (0-100)
+  // Example: if 2 out of 3 required tags are present, tagCoverage = 66.67
+}
+
+/**
+ * Validation error for tag operations
+ */
+interface ValidationError {
+  tagKey: TagKey;
+  message: string;
+  code: 'INVALID_KEY' | 'INVALID_VALUE' | 'MISSING_REQUIRED';
+}
+
+/**
+ * Error information for bulk tag operations
+ */
+interface BulkOperationError {
+  resourceId: string;
+  error: string;
+}
+```
+
+### Coverage Calculation Details
+
+**Compliance Definition:**
+A resource is considered compliant if it has all required tags present and non-empty:
+
+- `Environment` (required)
+- `Owner` (required)
+- `BusinessUnit` (required)
+
+**Coverage Metrics:**
+
+1. **Overall Compliance**: Percentage of resources that have all required tags
+
+   ```
+   overallCompliance = (compliantResources / totalResources) * 100
+   ```
+
+2. **Per-Tag Coverage**: Percentage of resources that have each specific tag (required or optional)
+
+   ```
+   perTagCoverage[tagKey] = (resourcesWithTag / totalResources) * 100
+   ```
+
+3. **Cost-Weighted Compliance**: Percentage of total monthly cost that comes from compliant resources
+
+   ```
+   costWeightedCompliance = (compliantCost / totalCost) * 100
+   ```
+
+   This metric is important for FinOps as it shows what percentage of spending is properly tagged for cost allocation.
+
+4. **Resource Tag Coverage**: For individual resources, the percentage of required tags present
+
+   ```
+   tagCoverage = (presentRequiredTags / totalRequiredTags) * 100
+   ```
+
+   Example: If a resource has `Environment` and `Owner` but missing `BusinessUnit`:
+   - Present: 2 tags
+   - Required: 3 tags
+   - Coverage: 66.67%
+
+5. **Breakdown Statistics**: Compliance metrics grouped by:
+   - **Provider** (Azure, AWS, GCP): Shows compliance per cloud provider
+   - **Type** (Virtual Machine, SQL Database, etc.): Shows compliance per resource type
+   - **Environment** (Production, Staging, Development, Testing, or "No Environment"): Shows compliance per environment tag value
 
 ### Application details
 
