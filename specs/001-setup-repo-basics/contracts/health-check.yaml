@@ -1,0 +1,62 @@
+openapi: 3.0.3
+info:
+  title: Health Check API
+  description: Health check endpoint for verifying backend server is operational
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns server status to verify the backend is operational
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Server is operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+              example:
+                status: "ok"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    HealthCheckResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: Server status indicator
+          example: "ok"
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: "INTERNAL_ERROR"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "An internal server error occurred"
+
