@@ -1247,3 +1247,39 @@ Get the tag schema definition, including required and optional tags with their a
   │ │
   │ [View All Non-Compliant Resources] │
   └────────────────────────────────────────────────────────
+
+## Plan
+
+1. Get proejct to a hello world state
+   - install and setup project structure and required packages
+   - frontend allows user to view pages dashbaord and resoures
+   - backend has a hello world example
+
+2. Build list
+   1. view resources
+      - implement backend
+      - implement frontend
+   2. view resource
+      - implement backend
+      - implement frontend
+   3. filter resources
+      - implement backend
+      - implement frontend
+   4. sort resources
+      - implement backend
+      - implement frontend
+   5. edit tags
+      1. implement backend
+      2. edit tags on the detail
+         - implement frontend
+      3. edit tags for a resource on the list via the tags popup
+         - implement frontend
+   6. bulk
+      1. implement backend
+      2. implemnt frontend
+         - form to edit
+         - logic for showing preview changes
+
+3. Build dashboard
+   1. implement backend
+   2. build each dashboard item
