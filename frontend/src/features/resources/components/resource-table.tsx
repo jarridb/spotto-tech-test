@@ -10,12 +10,18 @@ import type { ResourceWithCoverage } from '@spotto/types';
 import type { SortField, SortDirection } from '../hooks/use-resource-sort';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface ResourceTableProps {
   resources: ResourceWithCoverage[];
   sortField: SortField | null;
   sortDirection: SortDirection | null;
   onSort: (field: SortField) => void;
+  selectedResourceIds?: Set<string>;
+  onSelectAll?: (checked: boolean) => void;
+  onSelectResource?: (resourceId: string, checked: boolean) => void;
+  allSelected?: boolean;
+  someSelected?: boolean;
 }
 
 function SortableHeader({
@@ -66,6 +72,10 @@ export function ResourceTable({
   sortDirection,
   onSort,
   onClearFilters,
+  selectedResourceIds = new Set(),
+  onSelectAll,
+  onSelectResource,
+  allSelected = false,
 }: ResourceTablePropsWithClearFilters) {
   if (resources.length === 0) {
     return (
@@ -87,6 +97,15 @@ export function ResourceTable({
     <Table>
       <TableHeader>
         <TableRow>
+          {onSelectAll && (
+            <TableHead className="w-12">
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={(checked) => onSelectAll(checked === true)}
+                aria-label="Select all resources"
+              />
+            </TableHead>
+          )}
           <SortableHeader
             field="name"
             currentField={sortField}
@@ -139,7 +158,12 @@ export function ResourceTable({
       </TableHeader>
       <TableBody>
         {resources.map((resource) => (
-          <ResourceRow key={resource.id} resource={resource} />
+          <ResourceRow
+            key={resource.id}
+            resource={resource}
+            selected={selectedResourceIds.has(resource.id)}
+            onSelect={onSelectResource ? (checked) => onSelectResource(resource.id, checked) : undefined}
+          />
         ))}
       </TableBody>
     </Table>

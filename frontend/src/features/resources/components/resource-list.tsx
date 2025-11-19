@@ -1,9 +1,10 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useResources } from '../services/queries';
 import { ResourceTable } from './resource-table';
 import { useResourceSort } from '../hooks/use-resource-sort';
 import { useResourceFilters } from '../hooks/use-resource-filters';
 import { ResourceFilters } from './resource-filters';
+import { BulkEditActions } from './bulk-edit-actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
@@ -11,6 +12,7 @@ import { AlertCircle } from 'lucide-react';
 export function ResourceList() {
   const { sortState, toggleSort } = useResourceSort();
   const { filters, setFilter, clearFilter, clearAllFilters } = useResourceFilters();
+  const [selectedResourceIds, setSelectedResourceIds] = useState<Set<string>>(new Set());
 
   // Convert filters and sort to query params
   const queryParams = {
@@ -37,10 +39,32 @@ export function ResourceList() {
     return Array.from(regions).sort();
   }, [allResourcesData?.resources]);
 
-  // Clear selection when filters change (for future bulk operations)
+  // Clear selection when filters change
   useEffect(() => {
-    // This will be used when selection state is implemented
+    setSelectedResourceIds(new Set());
   }, [filters]);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked && data?.resources) {
+      setSelectedResourceIds(new Set(data.resources.map((r) => r.id)));
+    } else {
+      setSelectedResourceIds(new Set());
+    }
+  };
+
+  const handleSelectResource = (resourceId: string, checked: boolean) => {
+    const newSelection = new Set(selectedResourceIds);
+    if (checked) {
+      newSelection.add(resourceId);
+    } else {
+      newSelection.delete(resourceId);
+    }
+    setSelectedResourceIds(newSelection);
+  };
+
+  const handleBulkEditComplete = () => {
+    setSelectedResourceIds(new Set());
+  };
 
   if (isLoading) {
     return (
@@ -75,6 +99,10 @@ export function ResourceList() {
     return null;
   }
 
+  const allSelected = data?.resources && data.resources.length > 0 && 
+    data.resources.every((r) => selectedResourceIds.has(r.id));
+  const someSelected = selectedResourceIds.size > 0 && !allSelected;
+
   return (
     <div className="space-y-4">
       <ResourceFilters
@@ -84,12 +112,24 @@ export function ResourceList() {
         availableTypes={availableTypes}
         availableRegions={availableRegions}
       />
+      {selectedResourceIds.size >= 2 && (
+        <BulkEditActions
+          selectedResourceIds={Array.from(selectedResourceIds)}
+          resources={data.resources.filter((r) => selectedResourceIds.has(r.id))}
+          onComplete={handleBulkEditComplete}
+        />
+      )}
       <ResourceTable
         resources={data.resources}
         sortField={sortState.field}
         sortDirection={sortState.direction}
         onSort={toggleSort}
         onClearFilters={clearAllFilters}
+        selectedResourceIds={selectedResourceIds}
+        onSelectAll={handleSelectAll}
+        onSelectResource={handleSelectResource}
+        allSelected={allSelected || false}
+        someSelected={someSelected || false}
       />
     </div>
   );

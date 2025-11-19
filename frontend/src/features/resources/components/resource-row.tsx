@@ -1,10 +1,13 @@
 import { useNavigate } from '@tanstack/react-router';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
 import { TagCoverageBadge } from './tag-coverage-badge';
 import type { ResourceWithCoverage } from '@spotto/types';
 
 interface ResourceRowProps {
   resource: ResourceWithCoverage;
+  selected?: boolean;
+  onSelect?: (checked: boolean) => void;
 }
 
 function formatCurrency(amount: number): string {
@@ -16,11 +19,21 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function ResourceRow({ resource }: ResourceRowProps) {
+export function ResourceRow({ resource, selected = false, onSelect }: ResourceRowProps) {
   const navigate = useNavigate();
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on checkbox
+    if ((e.target as HTMLElement).closest('[role="checkbox"]')) {
+      return;
+    }
     navigate({ to: '/resources/$id', params: { id: resource.id } });
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    if (onSelect) {
+      onSelect(checked);
+    }
   };
 
   return (
@@ -32,10 +45,23 @@ export function ResourceRow({ resource }: ResourceRowProps) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleClick();
+          navigate({ to: '/resources/$id', params: { id: resource.id } });
         }
       }}
     >
+      {onSelect && (
+        <TableCell
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
+        >
+          <Checkbox
+            checked={selected}
+            onCheckedChange={handleCheckboxChange}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Select ${resource.name}`}
+          />
+        </TableCell>
+      )}
       <TableCell className="font-medium">{resource.name}</TableCell>
       <TableCell>{resource.type}</TableCell>
       <TableCell>{resource.provider}</TableCell>

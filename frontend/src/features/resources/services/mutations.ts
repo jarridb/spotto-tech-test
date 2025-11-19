@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api-client';
-import type { Tags, TagKey, UpdateResourceTagsResponse } from '@spotto/types';
+import type { Tags, TagKey, UpdateResourceTagsResponse, BulkTagPreview, BulkTagResponse } from '@spotto/types';
 import { getResource } from './api';
 
 /**
@@ -68,3 +68,38 @@ export function useRemoveResourceTag() {
   });
 }
 
+/**
+ * Mutation hook for bulk add/edit tag operations
+ */
+export function useBulkAddEditTag() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ resourceIds, tagsToAdd, preview = false }: { resourceIds: string[]; tagsToAdd: Tags; preview?: boolean }) => {
+      const requestBody = {
+        resourceIds,
+        tagsToAdd,
+        preview,
+      };
+
+      const response = await apiRequest<BulkTagPreview | BulkTagResponse>(
+        '/resources/bulk-tag',
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+        }
+      );
+      return response;
+    },
+    onSuccess: (_data, variables) => {
+      // Only invalidate if not in preview mode
+      if (!variables.preview) {
+        queryClient.invalidateQueries({ queryKey: ['resources'] });
+        // Invalidate individual resource queries
+        variables.resourceIds.forEach((id) => {
+          queryClient.invalidateQueries({ queryKey: ['resources', id] });
+        });
+      }
+    },
+  });
+}
