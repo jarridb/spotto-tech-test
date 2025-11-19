@@ -113,15 +113,15 @@
 
 ### Implementation for User Story 3
 
-- [ ] T042 [US3] Create Express server entry point in backend/src/index.ts
-- [ ] T043 [US3] Configure Express server to listen on port 3001 in backend/src/index.ts
-- [ ] T044 [US3] Create health check route handler in backend/src/routes/health.ts
-- [ ] T045 [US3] Implement GET /api/health endpoint returning `{"status": "ok"}` in backend/src/routes/health.ts
-- [ ] T046 [US3] Register health check route in Express app in backend/src/index.ts
-- [ ] T047 [US3] Implement 404 handler for non-existent endpoints in backend/src/index.ts
-- [ ] T048 [US3] Configure error logging middleware (errors and warnings only) in backend/src/middleware/error-logger.ts
-- [ ] T049 [US3] Add error handling for port conflicts with clear error messages in backend/src/index.ts
-- [ ] T050 [US3] Verify health check endpoint responds correctly
+- [x] T042 [US3] Create Express server entry point in backend/src/index.ts
+- [x] T043 [US3] Configure Express server to listen on port 3001 in backend/src/index.ts
+- [x] T044 [US3] Create health check route handler in backend/src/routes/health.ts
+- [x] T045 [US3] Implement GET /api/health endpoint returning `{"status": "ok"}` in backend/src/routes/health.ts
+- [x] T046 [US3] Register health check route in Express app in backend/src/index.ts
+- [x] T047 [US3] Implement 404 handler for non-existent endpoints in backend/src/index.ts
+- [x] T048 [US3] Configure error logging middleware (errors and warnings only) in backend/src/middleware/error-logger.ts
+- [x] T049 [US3] Add error handling for port conflicts with clear error messages in backend/src/index.ts
+- [x] T050 [US3] Verify health check endpoint responds correctly
 
 **Checkpoint**: At this point, all user stories should be independently functional. Backend API is operational and responsive.
 

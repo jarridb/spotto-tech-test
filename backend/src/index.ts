@@ -1,4 +1,5 @@
 import express from 'express';
+import { errorLogger } from './middleware/error-logger.js';
 import healthRouter from './routes/health.js';
 
 const app = express();
@@ -21,15 +22,17 @@ app.use((req, res) => {
 });
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({
-    error: {
-      code: 'INTERNAL_ERROR',
-      message: 'An internal server error occurred',
-    },
-  });
-});
+app.use(errorLogger);
+app.use(
+  (_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    res.status(500).json({
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'An internal server error occurred',
+      },
+    });
+  }
+);
 
 // Start server
 const server = app.listen(PORT, () => {
