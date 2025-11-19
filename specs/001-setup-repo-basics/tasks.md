@@ -89,17 +89,17 @@
 
 ### Implementation for User Story 2
 
-- [ ] T031 [US2] Create React entry point in frontend/src/main.tsx
-- [ ] T032 [US2] Create root App component in frontend/src/App.tsx
-- [ ] T033 [US2] Configure TanStack Router with route definitions in frontend/src/routes/index.tsx
-- [ ] T034 [P] [US2] Create Dashboard page component (empty) in frontend/src/routes/dashboard.tsx
-- [ ] T035 [P] [US2] Create Resources page component (empty) in frontend/src/routes/resources.tsx
-- [ ] T036 [US2] Create Sidebar navigation component with Dashboard and Resources links in frontend/src/components/sidebar.tsx
-- [ ] T037 [US2] Integrate Sidebar component into App layout in frontend/src/App.tsx
-- [ ] T038 [US2] Configure root route (/) to render Dashboard page in frontend/src/routes/index.tsx
-- [ ] T039 [US2] Configure /resources route to render Resources page in frontend/src/routes/index.tsx
-- [ ] T040 [US2] Add Tailwind CSS configuration and base styles in frontend/
-- [ ] T041 [US2] Verify routing works by testing navigation between pages
+- [x] T031 [US2] Create React entry point in frontend/src/main.tsx
+- [x] T032 [US2] Create root App component in frontend/src/App.tsx
+- [x] T033 [US2] Configure TanStack Router with route definitions in frontend/src/routes/index.tsx
+- [x] T034 [P] [US2] Create Dashboard page component (empty) in frontend/src/routes/dashboard.tsx
+- [x] T035 [P] [US2] Create Resources page component (empty) in frontend/src/routes/resources.tsx
+- [x] T036 [US2] Create Sidebar navigation component with Dashboard and Resources links in frontend/src/components/sidebar.tsx
+- [x] T037 [US2] Integrate Sidebar component into App layout in frontend/src/App.tsx
+- [x] T038 [US2] Configure root route (/) to render Dashboard page in frontend/src/routes/index.tsx
+- [x] T039 [US2] Configure /resources route to render Resources page in frontend/src/routes/index.tsx
+- [x] T040 [US2] Add Tailwind CSS configuration and base styles in frontend/
+- [x] T041 [US2] Verify routing works by testing navigation between pages
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Frontend routing and navigation are functional.
 
