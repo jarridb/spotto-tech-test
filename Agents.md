@@ -44,3 +44,10 @@
 **Tool:** Cursor
 **Result:** Updated spec/
 **Time Saved:** ~1 hour
+
+### 5. Spec the Resources
+
+**Prompt:** '/speckit.specify use the @SPEC.md and hte @README.md to build the resouces list see step 2, each sub task in the list group of tasks. the backend / front split are part will be seperate commits.
+**Tool:** Cursor
+**Result:** Updated spec/
+**Time Saved:** ~1 hour

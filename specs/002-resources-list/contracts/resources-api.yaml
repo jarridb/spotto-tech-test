@@ -1,0 +1,654 @@
+openapi: 3.0.3
+info:
+  title: Resources API
+  description: API endpoints for managing cloud resources and tags
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+paths:
+  /resources:
+    get:
+      summary: List resources
+      description: Get a list of all resources with optional filtering and sorting. Returns resources with tag coverage information.
+      operationId: listResources
+      tags:
+        - Resources
+      parameters:
+        - name: provider
+          in: query
+          description: Filter by provider (single selection)
+          schema:
+            type: string
+            enum: [Azure, AWS, GCP]
+        - name: type
+          in: query
+          description: Filter by resource type (single selection)
+          schema:
+            type: string
+        - name: region
+          in: query
+          description: Filter by region (single selection)
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            enum: [name, provider, monthlyCost]
+            default: name
+        - name: sortOrder
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceListResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /resources/{id}:
+    get:
+      summary: Get resource by ID
+      description: Get a single resource by its ID
+      operationId: getResource
+      tags:
+        - Resources
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Resource ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceDetailResponse'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /resources/{id}/tag:
+    post:
+      summary: Add or edit tag on resource
+      description: Add or edit a single tag on a resource. If the tag already exists, its value will be replaced.
+      operationId: addEditResourceTag
+      tags:
+        - Resources
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Resource ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+              example:
+                Owner: "finance-team"
+      responses:
+        '200':
+          description: Tag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResourceTagsResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Remove tag from resource
+      description: Remove a single tag from a resource
+      operationId: removeResourceTag
+      tags:
+        - Resources
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Resource ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveTagRequest'
+      responses:
+        '200':
+          description: Tag removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateResourceTagsResponse'
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /resources/bulk/tag:
+    post:
+      summary: Bulk add or edit tag
+      description: Add or edit a single tag across multiple resources. Supports preview mode.
+      operationId: bulkAddEditTag
+      tags:
+        - Resources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkAddEditTagRequest'
+      responses:
+        '200':
+          description: Successful response (preview or applied)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BulkTagPreview'
+                  - $ref: '#/components/schemas/BulkTagResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Bulk remove tag
+      description: Remove a single tag from multiple resources. Supports preview mode.
+      operationId: bulkRemoveTag
+      tags:
+        - Resources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRemoveTagRequest'
+      responses:
+        '200':
+          description: Successful response (preview or applied)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/BulkTagPreview'
+                  - $ref: '#/components/schemas/BulkTagResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tag-schema:
+    get:
+      summary: Get tag schema
+      description: Get the tag schema definition, including required and optional tags with their allowed values.
+      operationId: getTagSchema
+      tags:
+        - Tag Schema
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagSchemaResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /coverage:
+    get:
+      summary: Get coverage metrics
+      description: Get tag coverage metrics for all resources. Used by the dashboard to display compliance statistics.
+      operationId: getCoverage
+      tags:
+        - Coverage
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Resource:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - provider
+        - region
+        - monthlyCost
+        - tags
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the resource
+          example: "vm-prod-web-001"
+        name:
+          type: string
+          description: Human-readable name
+          example: "web-server-prod-east"
+        type:
+          type: string
+          description: Resource type
+          example: "Virtual Machine"
+        provider:
+          type: string
+          enum: [Azure, AWS, GCP]
+          description: Cloud provider
+        region:
+          type: string
+          description: Region where resource is deployed
+          example: "eastus"
+        monthlyCost:
+          type: number
+          description: Monthly cost in USD
+          example: 245.5
+        tags:
+          $ref: '#/components/schemas/Tags'
+
+    Tags:
+      type: object
+      additionalProperties:
+        type: string
+      properties:
+        Environment:
+          type: string
+          enum: [Production, Staging, Development, Testing]
+        Owner:
+          type: string
+        BusinessUnit:
+          type: string
+          enum: [Engineering, Sales, Marketing, Finance, Operations]
+        CostCenter:
+          type: string
+        Project:
+          type: string
+        Customer:
+          type: string
+      example:
+        Environment: "Production"
+        Owner: "platform-team"
+        BusinessUnit: "Engineering"
+
+    ResourceWithCoverage:
+      allOf:
+        - $ref: '#/components/schemas/Resource'
+        - type: object
+          required:
+            - tagCoverage
+          properties:
+            tagCoverage:
+              type: number
+              description: Percentage of required tags present (0-100)
+              example: 66.67
+
+    ResourceListResponse:
+      type: object
+      required:
+        - resources
+        - total
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceWithCoverage'
+        total:
+          type: integer
+          description: Total count of resources (after filtering)
+
+    ResourceDetailResponse:
+      type: object
+      required:
+        - resource
+      properties:
+        resource:
+          $ref: '#/components/schemas/Resource'
+
+    UpdateResourceTagsResponse:
+      type: object
+      required:
+        - resource
+      properties:
+        resource:
+          $ref: '#/components/schemas/Resource'
+
+    RemoveTagRequest:
+      type: object
+      required:
+        - key
+      properties:
+        key:
+          type: string
+          description: Tag key to remove
+          example: "Owner"
+
+    BulkAddEditTagRequest:
+      type: object
+      required:
+        - ids
+        - tag
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          description: Array of resource IDs to update
+        tag:
+          type: object
+          additionalProperties:
+            type: string
+          description: Single key-value tag object
+          example:
+            Owner: "cloud-team"
+        preview:
+          type: boolean
+          description: If true, return preview without applying changes
+          default: false
+
+    BulkRemoveTagRequest:
+      type: object
+      required:
+        - ids
+        - key
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          description: Array of resource IDs to update
+        key:
+          type: string
+          description: Tag key to remove from all resources
+        preview:
+          type: boolean
+          description: If true, return preview without applying changes
+          default: false
+
+    BulkTagPreview:
+      type: object
+      required:
+        - items
+        - summary
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkTagPreviewItem'
+        summary:
+          $ref: '#/components/schemas/BulkTagPreviewSummary'
+
+    BulkTagPreviewItem:
+      type: object
+      required:
+        - resourceId
+        - resourceName
+        - existingTags
+        - newTags
+      properties:
+        resourceId:
+          type: string
+        resourceName:
+          type: string
+        existingTags:
+          $ref: '#/components/schemas/Tags'
+        newTags:
+          $ref: '#/components/schemas/Tags'
+
+    BulkTagPreviewSummary:
+      type: object
+      required:
+        - totalResources
+        - resourcesToUpdate
+        - tagsToAdd
+        - tagsToRemove
+      properties:
+        totalResources:
+          type: integer
+        resourcesToUpdate:
+          type: integer
+        tagsToAdd:
+          type: integer
+        tagsToRemove:
+          type: integer
+
+    BulkTagResponse:
+      type: object
+      required:
+        - success
+        - updated
+      properties:
+        success:
+          type: boolean
+        updated:
+          type: integer
+          description: Number of resources successfully updated
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkOperationError'
+
+    BulkOperationError:
+      type: object
+      required:
+        - resourceId
+        - error
+      properties:
+        resourceId:
+          type: string
+        error:
+          type: string
+
+    TagSchema:
+      type: object
+      required:
+        - key
+        - required
+      properties:
+        key:
+          type: string
+        required:
+          type: boolean
+        allowedValues:
+          type: array
+          items:
+            type: string
+          readOnly: true
+
+    TagSchemaDefinition:
+      type: object
+      required:
+        - required
+        - optional
+      properties:
+        required:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSchema'
+        optional:
+          type: array
+          items:
+            $ref: '#/components/schemas/TagSchema'
+
+    TagSchemaResponse:
+      type: object
+      required:
+        - schema
+      properties:
+        schema:
+          $ref: '#/components/schemas/TagSchemaDefinition'
+
+    CoverageStats:
+      type: object
+      required:
+        - compliant
+        - total
+        - percentage
+      properties:
+        compliant:
+          type: integer
+        total:
+          type: integer
+        percentage:
+          type: number
+
+    TagCoverage:
+      type: object
+      required:
+        - overallCompliance
+        - compliantResources
+        - totalResources
+        - perTagCoverage
+        - costWeightedCompliance
+        - compliantCost
+        - totalCost
+        - breakdownByProvider
+        - breakdownByType
+        - breakdownByEnvironment
+      properties:
+        overallCompliance:
+          type: number
+          description: Percentage of resources that are compliant (0-100)
+        compliantResources:
+          type: integer
+        totalResources:
+          type: integer
+        perTagCoverage:
+          type: object
+          additionalProperties:
+            type: number
+          description: Tag key -> percentage of resources with that tag (0-100)
+        costWeightedCompliance:
+          type: number
+          description: Percentage of cost that is properly tagged (0-100)
+        compliantCost:
+          type: number
+        totalCost:
+          type: number
+        breakdownByProvider:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CoverageStats'
+        breakdownByType:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CoverageStats'
+        breakdownByEnvironment:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CoverageStats'
+
+    CoverageResponse:
+      type: object
+      required:
+        - coverage
+      properties:
+        coverage:
+          $ref: '#/components/schemas/TagCoverage'
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Tag validation failed"
+            details:
+              type: object
+              description: Optional additional error details
