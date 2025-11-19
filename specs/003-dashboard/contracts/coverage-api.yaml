@@ -1,0 +1,214 @@
+openapi: 3.0.3
+info:
+  title: Coverage API
+  description: API endpoint for tag coverage metrics (updated to include non-compliant resources)
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+
+paths:
+  /coverage:
+    get:
+      summary: Get coverage metrics
+      description: Get tag coverage metrics for all resources, including non-compliant resources list
+      operationId: getCoverage
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoverageResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CoverageResponse:
+      type: object
+      required:
+        - coverage
+      properties:
+        coverage:
+          $ref: '#/components/schemas/TagCoverage'
+
+    TagCoverage:
+      type: object
+      required:
+        - overallCompliance
+        - compliantResources
+        - totalResources
+        - perTagCoverage
+        - costWeightedCompliance
+        - compliantCost
+        - totalCost
+        - breakdownByProvider
+        - breakdownByType
+        - breakdownByEnvironment
+        - nonCompliantResources
+      properties:
+        overallCompliance:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 60.0
+          description: Percentage of resources that are compliant (0-100)
+        compliantResources:
+          type: integer
+          example: 12
+          description: Count of compliant resources
+        totalResources:
+          type: integer
+          example: 20
+          description: Total count of resources
+        perTagCoverage:
+          type: object
+          additionalProperties:
+            type: number
+            format: float
+            minimum: 0
+            maximum: 100
+          example:
+            Environment: 95.0
+            Owner: 85.0
+            BusinessUnit: 60.0
+          description: Per-tag coverage percentages (tag key -> percentage)
+        costWeightedCompliance:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 73.5
+          description: Percentage of cost that is properly tagged (0-100)
+        compliantCost:
+          type: number
+          format: float
+          example: 4523.8
+          description: Total monthly cost of compliant resources in USD
+        totalCost:
+          type: number
+          format: float
+          example: 6156.1
+          description: Total monthly cost of all resources in USD
+        breakdownByProvider:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CoverageStats'
+          example:
+            Azure:
+              compliant: 5
+              total: 9
+              percentage: 55.56
+        breakdownByType:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CoverageStats'
+          example:
+            "Virtual Machine":
+              compliant: 6
+              total: 8
+              percentage: 75.0
+        breakdownByEnvironment:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CoverageStats'
+          example:
+            Production:
+              compliant: 8
+              total: 12
+              percentage: 66.67
+        nonCompliantResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/NonCompliantResource'
+          maxItems: 10
+          description: Top non-compliant resources sorted by cost (highest first), limited to 5-10 items
+          example:
+            - id: "db-prod-mongo-001"
+              name: "mongodb-prod-cluster"
+              monthlyCost: 756.4
+              tagCoverage: 33.33
+            - id: "cdn-prod-001"
+              name: "cdn-global-prod"
+              monthlyCost: 678.9
+              tagCoverage: 33.33
+
+    NonCompliantResource:
+      type: object
+      required:
+        - id
+        - name
+        - monthlyCost
+        - tagCoverage
+      properties:
+        id:
+          type: string
+          example: "db-prod-mongo-001"
+          description: Resource ID
+        name:
+          type: string
+          example: "mongodb-prod-cluster"
+          description: Resource name
+        monthlyCost:
+          type: number
+          format: float
+          example: 756.4
+          description: Monthly cost in USD
+        tagCoverage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 99.99
+          example: 33.33
+          description: Percentage of required tags present (0-99.99, must be < 100 for non-compliant)
+
+    CoverageStats:
+      type: object
+      required:
+        - compliant
+        - total
+        - percentage
+      properties:
+        compliant:
+          type: integer
+          example: 5
+          description: Count of compliant resources in this group
+        total:
+          type: integer
+          example: 9
+          description: Total count of resources in this group
+        percentage:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          example: 55.56
+          description: Compliance percentage for this group (0-100)
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: "INTERNAL_ERROR"
+            message:
+              type: string
+              example: "Failed to calculate coverage"
+            details:
+              type: object
+

@@ -51,3 +51,10 @@
 **Tool:** Cursor
 **Result:** Updated spec/
 **Time Saved:** ~1 hour
+
+### 6. Spec the dashbaord
+
+**Prompt:** '/speckit.implement @001-resources-list phase as a commit which I can review before going to the next phase. Prompt me to continue or request prompts to change
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~1 hour

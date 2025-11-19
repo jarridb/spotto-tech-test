@@ -3,6 +3,7 @@
 Auto-generated from all feature plans. Last updated: 2025-11-19
 
 ## Active Technologies
+- In-memory array (no database for MVP) (002-resources-list)
 
 - TypeScript 5.9.3, Node.js v20.x (001-setup-repo-basics)
 
@@ -22,6 +23,8 @@ npm test && npm run lint
 TypeScript 5.9.3, Node.js v20.x: Follow standard conventions
 
 ## Recent Changes
+- 002-resources-list: Added TypeScript 5.9.3, Node.js v20.x
+- 002-resources-list: Added TypeScript 5.9.3
 
 - 001-setup-repo-basics: Added TypeScript 5.9.3, Node.js v20.x
 
