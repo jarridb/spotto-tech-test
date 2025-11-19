@@ -15,3 +15,13 @@
 **Tool:** Claude
 **Result:** updated Readme.md
 **Time Saved:** ~1 hour
+
+### 2. Datamodel
+
+**Prompt:** 'Based on the seed data and the description of the application in spec.md, define the datamodels, the list should make use of the seeddata, but the dashboard will need data models for the dashboard cards'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~1 hour
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~1 hour
