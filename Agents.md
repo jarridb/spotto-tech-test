@@ -58,3 +58,10 @@
 **Tool:** Cursor
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
+
+### 7. Build the basic setup for application
+
+**Prompt:** '/speckit.implement 001-setup-repo-basics. Setup required files, config and a basic hello world for the application. Prompt me to continue or request prompts to change'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~4 hour
