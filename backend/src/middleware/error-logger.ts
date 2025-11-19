@@ -1,15 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * Error logging middleware
  * Logs errors and warnings to console
  */
-export const errorLogger = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorLogger = (err: Error, req: Request, _res: Response, next: NextFunction) => {
   // Log errors
   console.error('Error:', {
     message: err.message,
@@ -29,4 +24,3 @@ export const errorLogger = (
 export const warningLogger = (message: string) => {
   console.warn('Warning:', message);
 };
-
