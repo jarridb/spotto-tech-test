@@ -46,13 +46,13 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T014 Configure frontend tsconfig.json to extend tsconfig.base.json in frontend/tsconfig.json
-- [ ] T015 Configure backend tsconfig.json to extend tsconfig.base.json in backend/tsconfig.json
-- [ ] T016 Configure types tsconfig.json to extend tsconfig.base.json in types/tsconfig.json
-- [ ] T017 [P] Create Vite configuration file in frontend/vite.config.ts
-- [ ] T018 [P] Create frontend index.html entry point in frontend/index.html
-- [ ] T019 Create root npm scripts for concurrent server startup in package.json (dev, dev:frontend, dev:backend)
-- [ ] T020 Create verification script that checks Node version, workspace structure, and dependencies in package.json (verify script)
+- [x] T014 Configure frontend tsconfig.json to extend tsconfig.base.json in frontend/tsconfig.json
+- [x] T015 Configure backend tsconfig.json to extend tsconfig.base.json in backend/tsconfig.json
+- [x] T016 Configure types tsconfig.json to extend tsconfig.base.json in types/tsconfig.json
+- [x] T017 [P] Create Vite configuration file in frontend/vite.config.ts
+- [x] T018 [P] Create frontend index.html entry point in frontend/index.html
+- [x] T019 Create root npm scripts for concurrent server startup in package.json (dev, dev:frontend, dev:backend)
+- [x] T020 Create verification script that checks Node version, workspace structure, and dependencies in package.json (verify script)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
