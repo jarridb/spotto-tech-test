@@ -46,7 +46,7 @@ export function Breadcrumb() {
     <BreadcrumbPrimitive>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink to="/">Home</BreadcrumbLink>
+          <BreadcrumbLink href="/">Home</BreadcrumbLink>
         </BreadcrumbItem>
         {breadcrumbItems.map((item) => (
           <React.Fragment key={item.pathname}>
@@ -55,7 +55,7 @@ export function Breadcrumb() {
               {item.isLast ? (
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
               ) : (
-                <BreadcrumbLink to={item.pathname}>{item.label}</BreadcrumbLink>
+                <BreadcrumbLink href={item.pathname}>{item.label}</BreadcrumbLink>
               )}
             </BreadcrumbItem>
           </React.Fragment>
