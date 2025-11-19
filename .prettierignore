@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# IDE and editor files
+.cursor/
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Spec files and templates (auto-generated or template files)
+.specify/
+specs/
+
+# Lock files (usually shouldn't be formatted)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

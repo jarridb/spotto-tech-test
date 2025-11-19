@@ -1,0 +1,34 @@
+{
+  "name": "spotto-tech-test",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloud Resource Tagging System",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "types"
+  ],
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "npm run dev:backend & npm run dev:frontend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "verify": "node scripts/verify.js",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.0.0",
+    "husky": "^9.1.0",
+    "prettier": "^3.4.0",
+    "prettier-plugin-organize-imports": "^4.1.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "typescript": "5.9.3"
+  }
+}
