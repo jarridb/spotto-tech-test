@@ -704,14 +704,15 @@ npm run prepare
 
 ## Time Log
 
-| Task | Duration | Notes |
-|------|----------|-------|
-| Reading supplied task.md | 5 min | Initial requirements review |
-| Setting up repository | 5 min | Git initialization, .gitignore |
-| Scaffolding project setup | 5 min | Workspace structure, package.json |
-| Architecture decisions | 15 min | Technology selection, trade-off analysis |
-| Documentation | 25 min | README creation and refinement |
-| **Total** | **110 min** | |
+| Task                      | Duration | Notes                                    |
+| ------------------------- | -------- | ---------------------------------------- |
+| Reading supplied task.md  | 5 min    | Initial requirements review              |
+| Setting up repository     | 5 min    | Git initialization, .gitignore           |
+| Scaffolding project setup | 5 min    | Workspace structure, package.json        |
+| Architecture decisions    | 20 min   | Technology selection, trade-off analysis |
+| Documentation             | 15 min   | README creation and refinement           |
+| SPEC.MD                   | 90 min   | Creating the spec.md to use for spec-kit |
+| Spec-kit from spec ot mvp | 30 min   |                                          |
 
 ---
 
