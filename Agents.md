@@ -38,3 +38,30 @@
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
 
+### 5. SPEC KIT - clarify
+
+**Prompt:** '/speckit.clarify'
+**Tool:** Cursor
+**Result:** spec updated
+**Time Saved:** ~1 hour
+
+### 6. SPEC KIT - plan
+
+**Prompt:** '/speckit.plan'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~1 hour
+
+### 7. SPEC KIT - specify
+
+**Prompt:** '/speckit.task'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~1 hour
+
+### 8. SPEC KIT - implement
+
+**Prompt:** '/speckit.implement with the MVP first, incremental delivery. Can each phase be a seperate commit. Once complete let me review.'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~4 hours
