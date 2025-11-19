@@ -37,3 +37,10 @@
 **Tool:** Cursor
 **Result:** Updated spec.md
 **Time Saved:** ~1 hour
+
+### 5. Spec the Setup
+
+**Prompt:** '/speckit.specify use the @SPEC.md and hte @README.md setup the repo with step 1, each sub task in the list group of tasks. the backend / front split are part will be seperate commits.
+**Tool:** Cursor
+**Result:** Updated spec/
+**Time Saved:** ~1 hour
