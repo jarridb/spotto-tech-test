@@ -32,7 +32,7 @@
 
 ### 4. SPEC KIT - specify
 
-**Prompt:** '/speckit.specify use the @SPEC.md and hte @README.md to specificy setting up the repo and getting the basic building block in place for build this application.  see up to steps 1.
+**Prompt:** '/speckit.specify use the @SPEC.md and hte @README.md to specificy setting up the repo and getting the basic building block in place for build this application. see up to steps 1.
 '
 **Tool:** Cursor
 **Result:** Updated Spec.md
@@ -58,10 +58,3 @@
 **Tool:** Cursor
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
-
-### 8. SPEC KIT - implement
-
-**Prompt:** '/speckit.implement with the MVP first, incremental delivery. Can each phase be a seperate commit. Once complete let me review.'
-**Tool:** Cursor
-**Result:** Updated Spec.md
-**Time Saved:** ~4 hours

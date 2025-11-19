@@ -15,16 +15,19 @@ This feature focuses on repository setup and infrastructure, so the data model i
 **Purpose**: Represents the monorepo structure and workspace metadata
 
 **Attributes**:
+
 - `name`: string - Workspace name (e.g., "frontend", "backend", "types")
 - `path`: string - Relative path to workspace directory
 - `packageJson`: object - Parsed package.json contents
 - `tsconfig`: object - TypeScript configuration (extends base config)
 
 **Relationships**:
+
 - Root workspace contains multiple child workspaces
 - Each workspace has its own package.json and tsconfig.json
 
 **Validation Rules**:
+
 - Workspace name must match directory name
 - package.json must exist in workspace directory
 - tsconfig.json must extend tsconfig.base.json
@@ -36,20 +39,24 @@ This feature focuses on repository setup and infrastructure, so the data model i
 **Purpose**: Represents a running development server instance
 
 **Attributes**:
+
 - `type`: "frontend" | "backend" - Server type
 - `port`: number - Port number (3001 for backend, 5173 for frontend)
 - `status`: "running" | "stopped" | "error" - Current server status
 - `processId`: number | null - Node.js process ID when running
 
 **Relationships**:
+
 - Belongs to a workspace (frontend or backend)
 - Can have multiple instances (though only one per workspace in this phase)
 
 **Validation Rules**:
+
 - Port must be available before starting server
 - Process ID must be valid when status is "running"
 
 **State Transitions**:
+
 - stopped → running (server start)
 - running → stopped (server stop)
 - running → error (server crash)
@@ -60,11 +67,13 @@ This feature focuses on repository setup and infrastructure, so the data model i
 **Purpose**: Response structure for backend health check endpoint
 
 **Attributes**:
+
 - `status`: string - Status indicator (e.g., "ok")
 
 **Relationships**: None (standalone response structure)
 
 **Validation Rules**:
+
 - Status must be a non-empty string
 - Response must be valid JSON
 
@@ -85,6 +94,7 @@ This feature focuses on repository setup and infrastructure, so the data model i
 **Purpose**: npm configuration for workspace management
 
 **Key Settings**:
+
 - `workspaces=true` - Enable workspace support
 - `save-exact=true` - Use exact versions
 - `engine-strict=true` - Enforce Node version
@@ -94,6 +104,7 @@ This feature focuses on repository setup and infrastructure, so the data model i
 **Purpose**: Shared TypeScript configuration
 
 **Key Settings**:
+
 - Strict mode enabled
 - ESM module system
 - Common compiler options for all workspaces
@@ -103,6 +114,7 @@ This feature focuses on repository setup and infrastructure, so the data model i
 **Purpose**: Root workspace manifest
 
 **Key Fields**:
+
 - `workspaces`: string[] - List of workspace directories
 - `scripts`: object - Root-level npm scripts
 - `devDependencies`: object - Shared development dependencies
@@ -112,16 +124,19 @@ This feature focuses on repository setup and infrastructure, so the data model i
 ### Frontend Routes
 
 **Dashboard Route** (`/`)
+
 - **Component**: Dashboard page (empty)
 - **Purpose**: Root route, validates routing works
 
 **Resources Route** (`/resources`)
+
 - **Component**: Resources page (empty)
 - **Purpose**: Secondary route, validates navigation works
 
 ### Backend Endpoints
 
 **Health Check** (`GET /api/health`)
+
 - **Request**: None (no query params or body)
 - **Response**: `{"status": "ok"}`
 - **Status Codes**: 200 OK
@@ -143,10 +158,10 @@ interface WorkspaceInfo {
 ### ServerStatus
 
 ```typescript
-type ServerStatus = "running" | "stopped" | "error";
+type ServerStatus = 'running' | 'stopped' | 'error';
 
 interface DevelopmentServer {
-  type: "frontend" | "backend";
+  type: 'frontend' | 'backend';
   port: number;
   status: ServerStatus;
   processId: number | null;
@@ -175,4 +190,3 @@ interface HealthCheckResponse {
 - Domain entities (Resource, Tag, etc.) will be introduced in subsequent features
 - Configuration entities are file-based rather than database-backed
 - Server state is ephemeral (exists only while servers are running)
-

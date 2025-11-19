@@ -39,6 +39,7 @@ npm install
 ```
 
 This will install dependencies for:
+
 - Root workspace (shared tooling)
 - Frontend workspace (React, Vite, etc.)
 - Backend workspace (Express, etc.)
@@ -73,11 +74,13 @@ npm run dev:frontend
 ### 6. Verify Setup
 
 **Frontend**:
+
 - Open http://localhost:5173 in your browser
 - You should see the Dashboard page (may be empty)
 - Click "Resources" in the sidebar to navigate to Resources page
 
 **Backend**:
+
 - Open http://localhost:3001/api/health in your browser
 - You should see: `{"status": "ok"}`
 
@@ -93,13 +96,13 @@ spotto-tech-test/
 
 ## Available Commands
 
-| Command | Description |
-|--------|-------------|
-| `npm install` | Install dependencies for all workspaces |
-| `npm run verify` | Verify Node version, workspace structure, and dependencies |
-| `npm run dev` | Start both frontend and backend servers |
-| `npm run dev:frontend` | Start only frontend server (port 5173) |
-| `npm run dev:backend` | Start only backend server (port 3001) |
+| Command                | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| `npm install`          | Install dependencies for all workspaces                    |
+| `npm run verify`       | Verify Node version, workspace structure, and dependencies |
+| `npm run dev`          | Start both frontend and backend servers                    |
+| `npm run dev:frontend` | Start only frontend server (port 5173)                     |
+| `npm run dev:backend`  | Start only backend server (port 3001)                      |
 
 ## Troubleshooting
 
@@ -108,6 +111,7 @@ spotto-tech-test/
 **Error**: "Node.js v20.x required"
 
 **Solution**:
+
 ```bash
 nvm use
 # or
@@ -119,6 +123,7 @@ nvm install
 **Error**: "Port 3001 (or 5173) is already in use"
 
 **Solution**:
+
 - Stop the process using the port
 - Or change the port in the configuration (not recommended for this phase)
 
@@ -127,6 +132,7 @@ nvm install
 **Error**: Peer dependency warnings or installation errors
 
 **Solution**:
+
 ```bash
 # Clean install
 rm -rf node_modules package-lock.json
@@ -138,6 +144,7 @@ npm install
 **Error**: "Workspace not found" or similar
 
 **Solution**:
+
 - Verify workspace directories exist (frontend/, backend/, types/)
 - Check package.json has correct `workspaces` configuration
 
@@ -168,4 +175,3 @@ If you encounter issues not covered here:
 1. Check the main [README.md](../../README.md) for detailed architecture information
 2. Review the [spec.md](./spec.md) for feature requirements
 3. Check error messages for actionable guidance
-

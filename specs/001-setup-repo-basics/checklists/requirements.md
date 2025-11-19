@@ -32,4 +32,3 @@
 ## Notes
 
 - All validation items pass. Specification is ready for `/speckit.clarify` or `/speckit.plan`
-

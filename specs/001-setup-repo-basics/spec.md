@@ -15,7 +15,7 @@
 - Q: What should Dashboard and Resources pages display in initial setup? → A: Completely empty pages (just routing works)
 - Q: What checks should the verification command perform? → A: Verify Node version, workspace structure, and dependency installation
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 - Developer Sets Up Development Environment (Priority: P1)
 
@@ -73,7 +73,7 @@ A developer confirms that the backend API server is running and responding to re
 - **Dependency installation failures**: System MUST display clear error messages explaining the failure reason (e.g., network issues, permission problems) and provide actionable steps to resolve
 - **Wrong directory execution**: System MUST detect when commands are run from incorrect directory and display a clear error message indicating the expected directory location
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -95,12 +95,12 @@ A developer confirms that the backend API server is running and responding to re
 - **FR-016**: System MUST display clear, actionable error messages when edge cases occur (wrong Node.js version, port conflicts, missing configs, dependency failures, wrong directory)
 - **FR-017**: Backend MUST log errors and warnings to the console with clear messages
 
-### Key Entities *(include if feature involves data)*
+### Key Entities _(include if feature involves data)_
 
 - **Workspace Configuration**: Represents the monorepo structure with frontend, backend, and types workspaces, each with their own dependency and build configuration
 - **Development Server**: Represents the running instances of frontend and backend servers that developers interact with during development
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

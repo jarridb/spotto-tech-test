@@ -12,25 +12,26 @@ Set up a monorepo development environment with frontend (React/Vite) and backend
 ## Technical Context
 
 **Language/Version**: TypeScript 5.9.3, Node.js v20.x  
-**Primary Dependencies**: 
+**Primary Dependencies**:
+
 - Frontend: React 19.2, Vite 7.2.2, TanStack Router 2.15.3, Tailwind CSS 4.0, Shadcn/ui
 - Backend: Express 4.x
 - Shared: TypeScript 5.9.3 (via types workspace)
 - Tooling: npm workspaces, Prettier 3.x, ESLint 9.x, Husky 9.x  
-**Storage**: N/A (in-memory storage for this phase)  
-**Testing**: Vitest 4.x (unit/component), Playwright 1.x (E2E/API)  
-**Target Platform**: Web application (browser + Node.js server)  
-**Project Type**: Web application (monorepo with frontend + backend)  
-**Performance Goals**: 
+  **Storage**: N/A (in-memory storage for this phase)  
+  **Testing**: Vitest 4.x (unit/component), Playwright 1.x (E2E/API)  
+  **Target Platform**: Web application (browser + Node.js server)  
+  **Project Type**: Web application (monorepo with frontend + backend)  
+  **Performance Goals**:
 - Setup completion: <5 minutes (SC-001)
 - Health check response: <100ms after server startup (SC-004)
 - Server startup success rate: 95% on first attempt (SC-002)  
-**Constraints**: 
+  **Constraints**:
 - Node.js v20.x enforced via .nvmrc
 - Ports: Backend 3001, Frontend 5173
 - npm workspaces for monorepo structure
 - TypeScript strict mode across all workspaces  
-**Scale/Scope**: 
+  **Scale/Scope**:
 - Single developer local development environment
 - 3 workspaces (frontend, backend, types)
 - 2 basic pages (Dashboard, Resources)
@@ -38,11 +39,12 @@ Set up a monorepo development environment with frontend (React/Vite) and backend
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 **Status**: No project-specific constitution file found. Using default development practices.
 
 **Gates**:
+
 - ✅ **Code Quality**: ESLint and Prettier configured for consistent formatting
 - ✅ **Testing**: Vitest and Playwright available for test coverage
 - ✅ **Type Safety**: TypeScript strict mode enforced across workspaces
