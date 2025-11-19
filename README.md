@@ -9,10 +9,12 @@ At Spotto, we help enterprises manage multi-cloud costs through accurate resourc
 ## Setup Instructions
 
 ### Prerequisites
+
 - **Node.js:** v20.x or higher (managed via `.nvmrc`)
 - **npm:** v10.x or higher (configured via `.npmrc`)
 
 ### Initial Setup
+
 ```bash
 # 1. Ensure you're using the correct Node version
 nvm use
@@ -32,6 +34,7 @@ npm run verify
 ```
 
 ### Running the Application
+
 ```bash
 # Start both frontend and backend concurrently
 npm run dev
@@ -46,15 +49,18 @@ npm run dev:frontend  # Starts on http://localhost:5173
 ## Architecture Decisions and Trade-offs
 
 ### Monorepo Structure
+
 This application is built as a monorepo to leverage shared TypeScript configurations and types between frontend and backend.
 
 **Reasons:**
+
 - **Code Reuse:** Shared type definitions prevent duplication and ensure consistency across the stack
 - **Simplified Dependency Management:** Single `package.json` at root reduces version conflicts
 - **Atomic Changes:** Frontend and backend changes can be committed and deployed together
 - **Developer Experience:** Single repository checkout with unified tooling
 
 #### TypeScript Configuration
+
 ```
 ./tsconfig.base.json          # Root shared configuration
 ./frontend/tsconfig.json      # Extends base, frontend-specific settings
@@ -62,10 +68,12 @@ This application is built as a monorepo to leverage shared TypeScript configurat
 ```
 
 **Reasons:**
+
 - Centralized compiler options ensure consistent build behavior
 - Workspace-specific overrides allow flexibility for different runtime environments
 
 #### Workspace Structure
+
 ```
 ./                  # Root workspace
 ./types             # Shared type definitions
@@ -74,6 +82,7 @@ This application is built as a monorepo to leverage shared TypeScript configurat
 ```
 
 **Reasons:**
+
 - Clear separation of concerns with explicit boundaries
 - Shared types package prevents circular dependencies
 - Easy to extract workspaces into separate repositories if needed
@@ -82,12 +91,12 @@ This application is built as a monorepo to leverage shared TypeScript configurat
 
 ### Tooling
 
-| Tool | Version | Purpose | Reasoning |
-|------|---------|---------|-----------|
-| **npm** | 10.x | Package Manager | Native to Node.js, adequate for monorepo without workspace complexity requiring pnpm/yarn |
-| **Prettier** | 3.x | Code Formatting | Industry standard, zero-configuration formatting |
-| **ESLint** | 9.x | Linting | Catches errors early, enforces code quality standards |
-| **Husky** | 9.x | Git Hooks | Pre-commit hooks ensure code quality before commits |
+| Tool         | Version | Purpose         | Reasoning                                                                                 |
+| ------------ | ------- | --------------- | ----------------------------------------------------------------------------------------- |
+| **npm**      | 10.x    | Package Manager | Native to Node.js, adequate for monorepo without workspace complexity requiring pnpm/yarn |
+| **Prettier** | 3.x     | Code Formatting | Industry standard, zero-configuration formatting                                          |
+| **ESLint**   | 9.x     | Linting         | Catches errors early, enforces code quality standards                                     |
+| **Husky**    | 9.x     | Git Hooks       | Pre-commit hooks ensure code quality before commits                                       |
 
 #### Node Version Management (.nvmrc)
 
@@ -96,17 +105,20 @@ This application is built as a monorepo to leverage shared TypeScript configurat
 **File Location:** `./.nvmrc`
 
 **Content:**
+
 ```
 20.11.0
 ```
 
 **Reasons:**
+
 - **Consistency:** Eliminates "works on my machine" issues caused by Node version differences
 - **Compatibility:** Ensures all dependencies work with the specified Node version
 - **CI/CD Alignment:** Build servers use the same version as local development
 - **Team Onboarding:** New developers automatically use the correct version with `nvm use`
 
 **Usage:**
+
 ```bash
 # Automatically switch to project's Node version
 nvm use
@@ -119,6 +131,7 @@ node --version  # Should match .nvmrc
 ```
 
 **Trade-offs:**
+
 - Requires developers to have `nvm` (Node Version Manager) installed
 - Additional step in setup process
 - **Benefit:** Prevents subtle bugs from Node version mismatches
@@ -132,6 +145,7 @@ node --version  # Should match .nvmrc
 **File Location:** `./.npmrc`
 
 **Content:**
+
 ```
 # Ensure consistent dependency resolution
 save-exact=true
@@ -157,23 +171,25 @@ workspaces=true
 
 **Configuration Breakdown:**
 
-| Setting | Value | Reasoning |
-|---------|-------|-----------|
-| `save-exact=true` | Exact versions (no `^` or `~`) | Prevents unexpected breaking changes from minor/patch updates |
-| `package-lock=true` | Always generate lockfile | Ensures reproducible builds across environments |
-| `legacy-peer-deps=false` | Strict peer dependency resolution | Catches incompatible dependency versions early |
-| `save-prefix=""` | No version prefixes | Works with `save-exact` for complete version locking |
-| `engine-strict=true` | Enforce Node version from package.json | Fails fast if wrong Node version is used |
-| `loglevel=warn` | Show warnings | Balance between verbosity and useful information |
-| `workspaces=true` | Enable npm workspaces | Required for monorepo structure |
+| Setting                  | Value                                  | Reasoning                                                     |
+| ------------------------ | -------------------------------------- | ------------------------------------------------------------- |
+| `save-exact=true`        | Exact versions (no `^` or `~`)         | Prevents unexpected breaking changes from minor/patch updates |
+| `package-lock=true`      | Always generate lockfile               | Ensures reproducible builds across environments               |
+| `legacy-peer-deps=false` | Strict peer dependency resolution      | Catches incompatible dependency versions early                |
+| `save-prefix=""`         | No version prefixes                    | Works with `save-exact` for complete version locking          |
+| `engine-strict=true`     | Enforce Node version from package.json | Fails fast if wrong Node version is used                      |
+| `loglevel=warn`          | Show warnings                          | Balance between verbosity and useful information              |
+| `workspaces=true`        | Enable npm workspaces                  | Required for monorepo structure                               |
 
 **Reasons:**
+
 - **Reproducibility:** Same `npm install` output on every machine
 - **Security:** Exact versions prevent supply chain attacks via unexpected updates
 - **Debugging:** Easier to identify when dependency updates cause issues
 - **Team Alignment:** All developers follow same npm behavior
 
 **Example Workflow:**
+
 ```bash
 # Install dependencies (respects .npmrc settings)
 npm install
@@ -187,6 +203,7 @@ npm install lodash@latest --save-exact
 ```
 
 **Trade-offs:**
+
 - **Strict Version Locking:** Must manually update dependencies
   - **Pro:** Complete control over dependency versions
   - **Con:** More maintenance overhead
@@ -195,6 +212,7 @@ npm install lodash@latest --save-exact
   - **Con:** Requires all developers to use `nvm use`
 
 **Production Benefits:**
+
 - Identical dependency versions between dev, staging, and production
 - Reduced "it works locally" incidents
 - Easier to audit dependencies for security vulnerabilities
@@ -204,7 +222,8 @@ npm install lodash@latest --save-exact
 
 **NPM and NVM Setup:**
 
-npm over pnpm/yarn:** Simpler setup for assessment scope, though pnpm would be preferred for production monorepos due to disk efficiency
+npm over pnpm/yarn:\*\* Simpler setup for assessment scope, though pnpm would be preferred for production monorepos due to disk efficiency
+
 - **Prettier + ESLint:** Some configuration overhead but prevents formatting debates and catches bugs
 - **nvm + .nvmrc:** Small setup cost for significant consistency benefits
 - **.npmrc:** Stricter dependency management requires more manual updates but prevents surprises
@@ -213,28 +232,31 @@ npm over pnpm/yarn:** Simpler setup for assessment scope, though pnpm would be p
 
 ## Frontend Stack
 
-| Technology | Version | Purpose | Reasoning |
-|------------|---------|---------|-----------|
-| **React** | 19.2 | UI Framework | Industry standard, excellent TypeScript support, vast ecosystem |
-| **TypeScript** | 5.9.3 | Type Safety | Catches errors at compile-time, improves IDE experience |
-| **Vite** | 7.2.2 | Build Tool | Fast HMR, optimized production builds, excellent DX |
-| **TanStack Router** | 2.15.3 | Routing | Type-safe routing, modern API, better than React Router for TypeScript |
-| **TanStack Query** | 6.6.7 | Data Fetching | Handles caching, loading states, refetching automatically |
-| **Tailwind CSS** | 4.0 | Styling | Rapid prototyping, utility-first approach, minimal CSS bundle |
-| **Shadcn/ui** | Latest | Component Library | Accessible components, owns the code (not a dependency), Tailwind-based |
-| **Vitest** | 4.x | Unit Testing | Fast, Vite-native, Jest-compatible API |
-| **Playwright** | 1.x | E2E Testing | Reliable, cross-browser, excellent debugging tools |
+| Technology          | Version | Purpose           | Reasoning                                                               |
+| ------------------- | ------- | ----------------- | ----------------------------------------------------------------------- |
+| **React**           | 19.2    | UI Framework      | Industry standard, excellent TypeScript support, vast ecosystem         |
+| **TypeScript**      | 5.9.3   | Type Safety       | Catches errors at compile-time, improves IDE experience                 |
+| **Vite**            | 7.2.2   | Build Tool        | Fast HMR, optimized production builds, excellent DX                     |
+| **TanStack Router** | 2.15.3  | Routing           | Type-safe routing, modern API, better than React Router for TypeScript  |
+| **TanStack Query**  | 6.6.7   | Data Fetching     | Handles caching, loading states, refetching automatically               |
+| **Tailwind CSS**    | 4.0     | Styling           | Rapid prototyping, utility-first approach, minimal CSS bundle           |
+| **Shadcn/ui**       | Latest  | Component Library | Accessible components, owns the code (not a dependency), Tailwind-based |
+| **Vitest**          | 4.x     | Unit Testing      | Fast, Vite-native, Jest-compatible API                                  |
+| **Playwright**      | 1.x     | E2E Testing       | Reliable, cross-browser, excellent debugging tools                      |
 
 ### State Management Strategy
+
 **TanStack Query for server state** instead of Redux/Zustand
 
 **Reasons:**
+
 - Server state (API data) is fundamentally different from client state
 - Automatic caching, background refetching, and stale-while-revalidate patterns
 - Eliminates boilerplate for loading/error states
 - Built-in optimistic updates and mutation handling
 
 **Trade-offs:**
+
 - Learning curve for developers familiar with Redux
 - Less control over cache invalidation strategies (though this is usually beneficial)
 
@@ -242,47 +264,69 @@ npm over pnpm/yarn:** Simpler setup for assessment scope, though pnpm would be p
 
 ## Backend Stack
 
-| Technology | Version | Purpose | Reasoning |
-|------------|---------|---------|-----------|
-| **Node.js** | 20.x | Runtime | JavaScript ecosystem, async I/O, wide adoption |
-| **TypeScript** | 5.9.3 | Type Safety | Shared types with frontend, reduces runtime errors |
-| **Express** | 4.x | Web Framework | Minimal, flexible, adequate for assessment scope |
-| **Vitest** | 4.x | Unit Testing | Consistent testing experience with frontend |
-| **Playwright** | 1.x | API Testing | Can test both UI and API with same tool |
-
+| Technology     | Version | Purpose       | Reasoning                                          |
+| -------------- | ------- | ------------- | -------------------------------------------------- |
+| **Node.js**    | 20.x    | Runtime       | JavaScript ecosystem, async I/O, wide adoption     |
+| **TypeScript** | 5.9.3   | Type Safety   | Shared types with frontend, reduces runtime errors |
+| **Express**    | 4.x     | Web Framework | Minimal, flexible, adequate for assessment scope   |
+| **Vitest**     | 4.x     | Unit Testing  | Consistent testing experience with frontend        |
+| **Playwright** | 1.x     | API Testing   | Can test both UI and API with same tool            |
 
 ### Framework Choice: Express
+
 **Why Express over NestJS/Next.js/Remix:**
 
 **Reasons:**
+
 - **Simplicity:** Minimal boilerplate for assessment scope
 - **Flexibility:** No opinionated structure, easy to demonstrate core concepts
 - **Assessment Constraints:** In-memory storage makes framework features like ORMs unnecessary
 - **Speed:** Fastest to scaffold and implement
 
 **Trade-offs:**
+
 - **Production Readiness:** Would require significant additions (validation, error handling middleware, security)
 - **Scalability:** Manual routing and middleware organization vs. NestJS decorators
 - **TypeScript Integration:** Less sophisticated than NestJS's dependency injection
 
 **Production Alternative:**
 For a real-world system, **NestJS** would be preferred:
+
 - Built-in dependency injection
 - Decorators for validation (class-validator)
 - Swagger integration
 - Modular architecture
 - Better testability
+
+---
+
+### Validation: Zod
+
+**Why Zod:**
+
+**Reasons:**
+
+- **frontend/backend:** both our frontend and backend can use it
+- **shadcn:** Shadcn already uses it in it's form components
+- **TypeScript Integration:** Can work with typescript
+
+**Trade-offs:**
+
+- **complixity:** zod offers a lot and can be complex to use
+
 ---
 
 ## Testing Strategy
 
 ### Testing Stack
+
 - **Vitest:** Unit and component tests
 - **Playwright:** E2E and integration tests
 
 **Reasons for This Combination:**
 
 #### Vitest Advantages
+
 - **Fast execution:** Native ESM support, parallel test runs
 - **Vite integration:** Uses same transform pipeline as dev server
 - **Component testing:** Can test React components in isolation
@@ -290,6 +334,7 @@ For a real-world system, **NestJS** would be preferred:
 - **Watch mode:** Instant feedback during development
 
 #### Playwright Advantages
+
 - **Real browser testing:** Tests actual user interactions
 - **Cross-browser:** Chromium, Firefox, WebKit support
 - **Reliable selectors:** Auto-waiting, retry logic
@@ -297,6 +342,7 @@ For a real-world system, **NestJS** would be preferred:
 - **API testing:** Can test backend endpoints directly
 
 **Test Distribution:**
+
 ```
 Vitest:
 - Utility functions
@@ -314,15 +360,12 @@ Playwright:
 ```
 
 **Trade-offs:**
+
 - **Setup complexity:** Two testing tools vs. one
 - **Maintenance:** Separate test suites to maintain
 - **Benefits:** Each tool used for its strengths, better coverage
 
-
 ## Code guidelines
-
-
-
 
 ---
 
@@ -333,7 +376,6 @@ Playwright:
 1. **No Input Validation**
    - Backend accepts any payload without validation
    - **Risk:** Invalid data causes runtime errors
-   - **Fix:** Add Zod schemas for request validation
 
 2. **No Error Handling**
    - Generic error responses
@@ -373,6 +415,7 @@ Playwright:
 ### 1. Install Node Version Manager (nvm)
 
 **macOS/Linux:**
+
 ```bash
 # Install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
@@ -424,6 +467,7 @@ npm ls --workspaces
 ### 4. IDE Configuration
 
 **VS Code Settings (.vscode/settings.json):**
+
 ```json
 {
   "typescript.tsdk": "node_modules/typescript/lib",
@@ -456,8 +500,10 @@ insert_final_newline = true
 trim_trailing_whitespace = false
 ```
 
-### Prettier 
+### Prettier
+
 Keeping prettier config simple but to get imports organised we should use
+
 ```
 {
   "semi": true,
@@ -474,12 +520,15 @@ Keeping prettier config simple but to get imports organised we should use
 - **prettier-plugin-tailwindcsss** - organizes tailwind classes: note this can be a pain if editing shadcn compoents but so are eslint/linting rules.
 
 ## Naming conventions
+
 **File Names:**
+
 - Use **lowercase** with **kebab-case** (hyphens) for all files
 - Examples: `resource-list.tsx`, `tag-validator.ts`, `api-client.ts`
 - Exception: Markdown files can use any case (e.g., `SPEC.md`, `README.md`)
 
 **TypeScript/JavaScript Files:**
+
 - Components: `resource-list.tsx`, `tag-editor.tsx`
 - Utilities: `format-currency.ts`, `validate-tags.ts`
 - Types: `resource.ts`, `tag.ts`, `api.ts`
@@ -487,41 +536,48 @@ Keeping prettier config simple but to get imports organised we should use
 - Routes: `resources.ts`, `coverage.ts`
 
 **Directories:**
+
 - Use lowercase kebab-case: `resource-detail/`, `tag-management/`
 - Feature folders: `dashboard/`, `resources/`
 
 **Variables and Functions:**
+
 - Use camelCase: `resourceList`, `updateResourceTags`, `isLoading`
 - Constants: UPPER_SNAKE_CASE: `API_BASE_URL`, `MAX_RESOURCES`
 - React components: PascalCase: `ResourceList`, `TagEditor`, `Dashboard`
 
 **TypeScript Types/Interfaces:**
+
 - Interfaces: PascalCase: `Resource`, `TagSchema`, `ApiError`
 - Types: PascalCase: `TagKey`, `EnvironmentValue`
 - Enums: PascalCase: `Provider`, `ResourceType`
 
 ### Eslint
+
 Keeping eslint config simple use recommended setups for now
 
 ### Coding standard
 
 **Formatting**
-   - Code should be auto-formatted on save (configured in `.vscode/settings.json`)
-   - Run `npm run format` to format all files
-   - Ensure consistent formatting across the codebase
+
+- Code should be auto-formatted on save (configured in `.vscode/settings.json`)
+- Run `npm run format` to format all files
+- Ensure consistent formatting across the codebase
 
 **TypeScript**
-   - Avoid `any` types - use proper types or `unknown`
-   - Enable strict mode in `tsconfig.json`
-   - Fix all TypeScript errors before committing
+
+- Avoid `any` types - use proper types or `unknown`
+- Enable strict mode in `tsconfig.json`
+- Fix all TypeScript errors before committing
 
 **Import Organization**
-   - Group imports: external packages → internal modules → types
-   - Remove unused imports
-   - **CRITICAL: Always use alias paths (`@/`) unless importing from the same directory or a child directory**
-   - Same directory: Use relative imports (`./component`, `./utils`)
-   - Child directory: Use relative imports (`./components/sub-component`, `../sibling`)
-   - All other imports: Use alias paths (`@/services/...`, `@/components/...`, `@/features/...`, `@/lib/...`)
+
+- Group imports: external packages → internal modules → types
+- Remove unused imports
+- **CRITICAL: Always use alias paths (`@/`) unless importing from the same directory or a child directory**
+- Same directory: Use relative imports (`./component`, `./utils`)
+- Child directory: Use relative imports (`./components/sub-component`, `../sibling`)
+- All other imports: Use alias paths (`@/services/...`, `@/components/...`, `@/features/...`, `@/lib/...`)
 
 **Import Path Rules:**
 
@@ -543,8 +599,9 @@ Keeping eslint config simple use recommended setups for now
 
 **components**
 This folder is for shared components or generic that dont are used across multiple features
+
 - each component will have a folder with an the default component and an export
-- child components will live in `./components/<compoent-name>/components/sub-component` 
+- child components will live in `./components/<compoent-name>/components/sub-component`
 - only the root component is exported
 - other components are relative
 
@@ -553,13 +610,15 @@ shadcn/ui components
 
 **features**
 We will use feature driven setup
-  - Features are self-contained modules (components, logic, types)
-  - Easier to locate and maintain code
-  - Better code organization and scalability
-  - Clear separation between features, shared components, and services
+
+- Features are self-contained modules (components, logic, types)
+- Easier to locate and maintain code
+- Better code organization and scalability
+- Clear separation between features, shared components, and services
 
 **services**
 each api end point will have a service and this will be made up of 3 files
+
 - **api** - fetch for api calls
 - **queries** - tanstack query to fetch data
 - **mutations** - tanstack query mutation to make updates
@@ -567,12 +626,14 @@ each api end point will have a service and this will be made up of 3 files
 ### 5. Common Issues & Solutions
 
 **Issue: `npm install` fails with peer dependency errors**
+
 ```bash
 # Solution: Ensure legacy-peer-deps is false in .npmrc
 npm install --legacy-peer-deps=false
 ```
 
 **Issue: Wrong Node version**
+
 ```bash
 # Solution: Use nvm to switch versions
 nvm use
@@ -581,6 +642,7 @@ nvm install
 ```
 
 **Issue: Package-lock.json conflicts**
+
 ```bash
 # Solution: Clean install
 rm -rf node_modules package-lock.json
@@ -588,6 +650,7 @@ npm install
 ```
 
 **Issue: Husky hooks not running**
+
 ```bash
 # Solution: Reinstall husky
 npm run prepare
@@ -639,15 +702,15 @@ npm run prepare
 The following are suggestion of things to do
 
 ### Phase 1: Production Backend
+
 - [ ] Replace Express with **NestJS** for better structure
 - [ ] Add **PostgreSQL** with TypeORM/Prisma
 - [ ] Implement **JWT authentication**
-- [ ] Add request validation with **Zod**
 - [ ] Implement structured error handling
 - [ ] Add logging
 
-
 ### Phase 2: Enhanced Features
+
 - [ ] Add Analytics #posthog
 - [ ] Implement pagination and filtering
 - [ ] Add bulk operations (tag multiple resources)
@@ -656,6 +719,7 @@ The following are suggestion of things to do
 - [ ] Audit log for tag changes
 
 ### Phase 3: Scalability
+
 - [ ] Add caching
 - [ ] Implement rate limiting
 - [ ] Add database indexing
@@ -663,6 +727,7 @@ The following are suggestion of things to do
 - [ ] Set up **Kubernetes** deployment
 
 ### Phase 4: Developer Experience
+
 - [ ] Extract Shadcn/ui to separate workspace
 - [ ] Add **Storybook** for component documentation
 - [ ] Set up **GitHub Actions** CI/CD
@@ -677,6 +742,7 @@ The following are suggestion of things to do
 ## Instructions for Running Tests
 
 ### Unit Tests (Vitest)
+
 ```bash
 # Run all unit tests
 npm run test
@@ -692,6 +758,7 @@ npm run test -- path/to/test.spec.ts
 ```
 
 ### E2E Tests (Playwright)
+
 ```bash
 # Install Playwright browsers (first time only)
 npx playwright install
@@ -747,4 +814,4 @@ spotto-tagging-system/
 
 ---
 
-*This README will be updated as the project evolves.*
+_This README will be updated as the project evolves._
