@@ -22,6 +22,10 @@
 **Tool:** Cursor
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
+
+### 3. Endpoints
+
+**Prompt:** 'Based on the seed data and the description of the application in spec.md, defined the api endpoints'
 **Tool:** Cursor
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
