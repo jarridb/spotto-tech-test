@@ -131,14 +131,14 @@
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T051 [P] Update README.md with setup instructions from quickstart.md
-- [ ] T052 [P] Verify all TypeScript compilation succeeds without errors across all workspaces
-- [ ] T053 [P] Verify all npm scripts work correctly (dev, dev:frontend, dev:backend, verify)
-- [ ] T054 [P] Test edge cases: wrong Node version, port conflicts, missing configs, dependency failures
-- [ ] T055 [P] Ensure error messages are clear and actionable per FR-016
-- [ ] T056 [P] Verify concurrent server startup works without port conflicts
-- [ ] T057 [P] Run quickstart.md validation steps
-- [ ] T058 Code cleanup and formatting (run Prettier/ESLint)
+- [x] T051 [P] Update README.md with setup instructions from quickstart.md
+- [x] T052 [P] Verify all TypeScript compilation succeeds without errors across all workspaces
+- [x] T053 [P] Verify all npm scripts work correctly (dev, dev:frontend, dev:backend, verify)
+- [x] T054 [P] Test edge cases: wrong Node version, port conflicts, missing configs, dependency failures
+- [x] T055 [P] Ensure error messages are clear and actionable per FR-016
+- [x] T056 [P] Verify concurrent server startup works without port conflicts
+- [x] T057 [P] Run quickstart.md validation steps
+- [x] T058 Code cleanup and formatting (run Prettier/ESLint)
 
 ---
 
