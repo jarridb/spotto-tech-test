@@ -29,7 +29,15 @@ cd spotto-tagging-system
 # 3. Install dependencies
 npm install
 
-# 4. Verify installation
+# 4. Set up environment variables (optional)
+# Copy the root example environment file and customize if needed
+cp .env.example .env
+
+# Note: The application works with defaults, so this step is optional
+# Only customize .env if you need to change ports or URLs
+# Both backend and frontend read from the root .env file
+
+# 5. Verify installation
 npm run verify
 ```
 
@@ -451,7 +459,43 @@ npm install
 npm run verify
 ```
 
-### 3. Verify Environment
+### 3. Environment Variables
+
+The application uses a single root `.env` file for configuration (shared across all workspaces). Copy the example file and customize as needed:
+
+```bash
+# Copy the root example environment file
+cp .env.example .env
+```
+
+**Why a single root .env file?**
+
+- Simpler configuration: one file instead of multiple
+- Single source of truth for all environment variables
+- Both backend and frontend automatically read from the root `.env` file
+- Easier to manage and maintain
+
+**Environment Variables:**
+
+| Variable       | Location | Default                     | Description                         |
+| -------------- | -------- | --------------------------- | ----------------------------------- |
+| `PORT`         | Backend  | `3001`                      | Backend server port                 |
+| `HOST`         | Backend  | `localhost`                 | Backend server host                 |
+| `FRONTEND_URL` | Backend  | `http://localhost:5173`     | Frontend URL for CORS configuration |
+| `VITE_API_URL` | Frontend | `http://localhost:3001/api` | Backend API base URL                |
+| `VITE_PORT`    | Frontend | `5173`                      | Frontend dev server port            |
+| `VITE_HOST`    | Frontend | `localhost`                 | Frontend dev server host            |
+
+**Note:** Vite requires the `VITE_` prefix for environment variables to be exposed to the client-side code.
+
+**Minimal Configuration:**
+
+- For local development, defaults work out of the box
+- Only set environment variables if you need to change ports or URLs
+- The backend CORS middleware uses `FRONTEND_URL` to allow cross-origin requests
+- The frontend API client uses `VITE_API_URL` to connect to the backend
+
+### 4. Verify Environment
 
 ```bash
 # Check that workspaces are detected
@@ -464,7 +508,7 @@ npm ls --workspaces
 # └── @spotto/types@1.0.0
 ```
 
-### 4. IDE Configuration
+### 5. IDE Configuration
 
 **VS Code Settings (.vscode/settings.json):**
 

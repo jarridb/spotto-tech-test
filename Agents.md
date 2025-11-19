@@ -65,3 +65,10 @@
 **Tool:** Cursor
 **Result:** Updated Spec.md
 **Time Saved:** ~4 hour
+
+### 8. Add Cors
+
+**Prompt:** 'Add middleware for the backend to use for cors so the frontend can access it correctly. Create environment variable th for the the port, host and url the the frontend and backend run on. we should have 1 env file for backend and frontend in the root that both workspaces share, The env variables should be used in the dev server and the corMiddleware for the backend. propose the best way to handle this in in both backend and frontend adn reduce the number of env variabels if possible. add instructions to the @README.md under Initial Setup, after # 3. Install dependencies'
+**Tool:** Cursor
+**Result:** Updated instructions, cors setup, vite setup, added .env example
+**Time Saved:** ~30 min

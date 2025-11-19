@@ -1,10 +1,16 @@
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // Load env vars from root .env file (monorepo setup)
+  // Vite only loads VITE_ prefixed vars for client, but we need all for config
+  const rootDir = path.resolve(__dirname, '..');
+  const env = loadEnv(mode, rootDir, '');
+
+  return {
   plugins: [
     tanstackRouter({
       target: 'react',
@@ -18,7 +24,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    port: 5173,
-  },
+    server: {
+      port: env.VITE_PORT ? parseInt(env.VITE_PORT, 10) : 5173,
+      host: env.VITE_HOST || 'localhost',
+    },
+  };
 });
