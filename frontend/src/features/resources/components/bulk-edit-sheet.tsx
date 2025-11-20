@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -17,22 +17,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useBulkAddEditTag } from '../services/mutations';
+import { useBulkAddEditTag, useBulkRemoveTag } from '../services/mutations';
 import type { ResourceWithCoverage, TagKey, Tags, EnvironmentValue, BusinessUnitValue } from '@spotto/types';
 import { Environment, BusinessUnit } from '@spotto/types';
 
 interface BulkEditSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  operation: 'add' | 'edit' | 'remove';
+  operation: 'add' | 'remove';
+  selectedTag: TagKey;
   selectedResourceIds: string[];
   resources: ResourceWithCoverage[];
   onComplete: () => void;
 }
-
-const REQUIRED_TAGS: TagKey[] = ['Environment', 'Owner', 'BusinessUnit'];
-const OPTIONAL_TAGS: TagKey[] = ['CostCenter', 'Project', 'Customer'];
-const ALL_TAGS: TagKey[] = [...REQUIRED_TAGS, ...OPTIONAL_TAGS];
 
 const ENVIRONMENT_OPTIONS: EnvironmentValue[] = [
   Environment.Production,
@@ -53,94 +50,187 @@ export function BulkEditSheet({
   open,
   onOpenChange,
   operation,
+  selectedTag,
   selectedResourceIds,
   resources,
   onComplete,
 }: BulkEditSheetProps) {
-  const [selectedTag, setSelectedTag] = useState<TagKey | ''>('');
   const [tagValue, setTagValue] = useState<string>('');
   const [showPreview, setShowPreview] = useState(false);
+  const previewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isFetchingPreviewRef = useRef<boolean>(false);
+  const lastPreviewKeyRef = useRef<string>('');
+  const removePreviewInitializedRef = useRef<boolean>(false);
   
   const bulkMutation = useBulkAddEditTag();
+  const bulkRemoveMutation = useBulkRemoveTag();
 
-  // Get available tags based on operation
-  const availableTags = useMemo(() => {
-    if (operation === 'add') {
-      // Tags that are not present on ANY selected resource
-      const tagsOnResources = new Set<TagKey>();
-      resources.forEach((resource) => {
-        Object.keys(resource.tags).forEach((key) => {
-          if (resource.tags[key as TagKey]) {
-            tagsOnResources.add(key as TagKey);
-          }
-        });
-      });
-      return ALL_TAGS.filter((tag) => !tagsOnResources.has(tag));
-    } else if (operation === 'edit' || operation === 'remove') {
-      // Tags that are present on AT LEAST ONE selected resource
-      const tagsOnResources = new Set<TagKey>();
-      resources.forEach((resource) => {
-        Object.keys(resource.tags).forEach((key) => {
-          if (resource.tags[key as TagKey]) {
-            tagsOnResources.add(key as TagKey);
-          }
-        });
-      });
-      return Array.from(tagsOnResources);
-    }
-    return [];
-  }, [operation, resources]);
-
-  // Reset form when operation changes
+  // Reset form when sheet opens/closes or tag changes
   useEffect(() => {
-    setSelectedTag('');
-    setTagValue('');
-    setShowPreview(false);
-  }, [operation, open]);
+    if (!open) {
+      setTagValue('');
+      setShowPreview(false);
+      isFetchingPreviewRef.current = false;
+      lastPreviewKeyRef.current = '';
+      removePreviewInitializedRef.current = false;
+      if (previewTimeoutRef.current) {
+        clearTimeout(previewTimeoutRef.current);
+        previewTimeoutRef.current = null;
+      }
+    } else if (open && operation === 'remove') {
+      // Reset the initialized flag when sheet opens for remove operation
+      removePreviewInitializedRef.current = false;
+    }
+  }, [open, selectedTag, operation]);
 
-  const handlePreview = async () => {
-    if (!selectedTag) return;
+  // Calculate how many resources already have this tag (for add/edit operation)
+  const resourcesWithTag = useMemo(() => {
+    if (operation === 'add') {
+      return resources.filter((r) => {
+        const tagVal = r.tags[selectedTag];
+        return tagVal !== undefined && tagVal !== null && tagVal !== '';
+      }).length;
+    }
+    return 0;
+  }, [operation, resources, selectedTag]);
 
-    const tagsToAdd: Tags = {
-      [selectedTag]: tagValue.trim() as any,
+  // Calculate how many resources don't have this tag (for remove operation)
+  const resourcesWithoutTag = useMemo(() => {
+    if (operation === 'remove') {
+      return resources.filter((r) => {
+        const tagVal = r.tags[selectedTag];
+        return tagVal === undefined || tagVal === null || tagVal === '';
+      }).length;
+    }
+    return 0;
+  }, [operation, resources, selectedTag]);
+
+  // Debounced preview when tag value changes (for add/edit)
+  useEffect(() => {
+    if (operation !== 'add' || !selectedTag || !tagValue.trim() || !open) {
+      setShowPreview(false);
+      return;
+    }
+
+    // Prevent multiple simultaneous preview fetches
+    if (isFetchingPreviewRef.current) {
+      return;
+    }
+
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
+    }
+
+    previewTimeoutRef.current = setTimeout(async () => {
+      if (isFetchingPreviewRef.current) {
+        return;
+      }
+
+      isFetchingPreviewRef.current = true;
+      const tagsToAdd: Tags = {
+        [selectedTag]: tagValue.trim() as any,
+      };
+
+      try {
+        await bulkMutation.mutateAsync({
+          resourceIds: selectedResourceIds,
+          tagsToAdd,
+          preview: true,
+        });
+        setShowPreview(true);
+      } catch (error) {
+        console.error('Preview failed:', error);
+        setShowPreview(false);
+      } finally {
+        isFetchingPreviewRef.current = false;
+      }
+    }, 400); // 400ms debounce
+
+    return () => {
+      if (previewTimeoutRef.current) {
+        clearTimeout(previewTimeoutRef.current);
+      }
+    };
+  }, [tagValue, selectedTag, selectedResourceIds, operation, open]);
+
+  // Immediate preview when tag is selected for remove operation
+  useEffect(() => {
+    if (operation !== 'remove' || !selectedTag || !open) {
+      return;
+    }
+
+    // Prevent multiple calls - only fetch once per sheet open
+    if (removePreviewInitializedRef.current || isFetchingPreviewRef.current) {
+      return;
+    }
+
+    const fetchPreview = async () => {
+      // Mark as initialized immediately to prevent duplicate calls
+      removePreviewInitializedRef.current = true;
+      isFetchingPreviewRef.current = true;
+      
+      try {
+        // Explicitly ensure preview is true - create a new object to avoid any reference issues
+        const previewParams = {
+          resourceIds: [...selectedResourceIds], // Create a new array
+          tagKey: selectedTag,
+          preview: true as const, // Use 'as const' to ensure it's always true
+        };
+        
+        const result = await bulkRemoveMutation.mutateAsync(previewParams);
+        
+        // Only show preview if we got a preview response (not a submission response)
+        if (result && 'items' in result) {
+          setShowPreview(true);
+        }
+      } catch (error) {
+        console.error('Preview failed:', error);
+        setShowPreview(false);
+        // Reset initialized flag on error so we can retry if sheet stays open
+        removePreviewInitializedRef.current = false;
+      } finally {
+        isFetchingPreviewRef.current = false;
+      }
     };
 
-    try {
-      await bulkMutation.mutateAsync({
-        resourceIds: selectedResourceIds,
-        tagsToAdd,
-        preview: true,
-      });
-      setShowPreview(true);
-    } catch (error) {
-      console.error('Preview failed:', error);
-    }
-  };
+    fetchPreview();
+  }, [selectedTag, selectedResourceIds, operation, open]);
 
   const handleApply = async () => {
-    if (!selectedTag || !tagValue.trim()) return;
+    if (operation === 'remove') {
+      try {
+        await bulkRemoveMutation.mutateAsync({
+          resourceIds: selectedResourceIds,
+          tagKey: selectedTag,
+          preview: false,
+        });
+        onComplete();
+        onOpenChange(false);
+      } catch (error) {
+        console.error('Bulk remove failed:', error);
+      }
+    } else {
+      if (!tagValue.trim()) return;
 
-    const tagsToAdd: Tags = {
-      [selectedTag]: tagValue.trim() as any,
-    };
+      const tagsToAdd: Tags = {
+        [selectedTag]: tagValue.trim() as any,
+      };
 
-    try {
-      await bulkMutation.mutateAsync({
-        resourceIds: selectedResourceIds,
-        tagsToAdd,
-        preview: false,
-      });
-      onComplete();
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Bulk operation failed:', error);
+      try {
+        await bulkMutation.mutateAsync({
+          resourceIds: selectedResourceIds,
+          tagsToAdd,
+          preview: false,
+        });
+        onComplete();
+        onOpenChange(false);
+      } catch (error) {
+        console.error('Bulk operation failed:', error);
+      }
     }
   };
 
-
   const renderTagValueInput = () => {
-    if (!selectedTag) return null;
-
     if (selectedTag === 'Environment') {
       return (
         <Select value={tagValue} onValueChange={setTagValue}>
@@ -184,42 +274,89 @@ export function BulkEditSheet({
     );
   };
 
+  // Format tags for display
+  const formatTagsForDisplay = (tags: Tags): string => {
+    const tagEntries = Object.entries(tags)
+      .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ');
+    return tagEntries || 'No tags';
+  };
+
   if (operation === 'remove') {
+    const previewData = bulkRemoveMutation.data && 'items' in bulkRemoveMutation.data ? bulkRemoveMutation.data : null;
+
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent>
+        <SheetContent className="sm:max-w-[640px]">
           <SheetHeader>
-            <SheetTitle>Remove Tag</SheetTitle>
+            <SheetTitle>Remove Tag ({selectedResourceIds.length} resources)</SheetTitle>
             <SheetDescription>
-              Select a tag to remove from {selectedResourceIds.length} resource(s).
+              Remove the "{selectedTag}" tag from all selected resources.
             </SheetDescription>
           </SheetHeader>
+
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Tag to Remove</Label>
-              <Select value={selectedTag} onValueChange={(value) => setSelectedTag(value as TagKey)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select tag" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTags.map((tag) => (
-                    <SelectItem key={tag} value={tag}>
-                      {tag}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="rounded-md bg-muted p-3">
-              <p className="text-sm text-muted-foreground">
-                Bulk remove operation requires backend DELETE endpoint support. 
-                Please remove tags individually from the resource detail page for now.
-              </p>
-            </div>
+            {/* Summary message */}
+            {showPreview && previewData && (
+              <div className="rounded-md border p-3 bg-muted/50">
+                <p className="text-sm font-medium">
+                  {previewData.summary.resourcesToUpdate} resource{previewData.summary.resourcesToUpdate !== 1 ? 's' : ''} will be updated.
+                  {resourcesWithoutTag > 0 && (
+                    <span className="text-muted-foreground ml-1">
+                      {resourcesWithoutTag} do not have this tag.
+                    </span>
+                      )}
+                </p>
+                  </div>
+            )}
+
+            {/* Preview */}
+            {showPreview && previewData && (
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="rounded-md border p-3 max-h-96 overflow-y-auto">
+                  <div className="space-y-4">
+                    {previewData.items.map((item: { resourceId: string; resourceName: string; existingTags: Tags; newTags: Tags }) => (
+                      <div key={item.resourceId} className="text-sm border-b last:border-b-0 pb-3 last:pb-0">
+                        <div className="font-medium mb-2">{item.resourceName}</div>
+                        <div className="space-y-1 text-muted-foreground">
+                          <div>
+                            <span className="font-medium">Current tags:</span>{' '}
+                            {formatTagsForDisplay(item.existingTags)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Tags after save:</span>{' '}
+                            {formatTagsForDisplay(item.newTags)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {bulkRemoveMutation.isError && (
+              <div className="rounded-md bg-destructive/10 border border-destructive/20 p-3">
+                <p className="text-sm text-destructive">
+                  {bulkRemoveMutation.error instanceof Error
+                    ? bulkRemoveMutation.error.message
+                    : 'An error occurred'}
+                </p>
+              </div>
+            )}
           </div>
+
           <SheetFooter>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
+            </Button>
+            <Button
+              onClick={handleApply}
+              disabled={bulkRemoveMutation.isPending}
+            >
+              {bulkRemoveMutation.isPending ? 'Removing...' : 'Apply'}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -227,62 +364,59 @@ export function BulkEditSheet({
     );
   }
 
+  // Add/Edit operation
+  const previewData = bulkMutation.data && 'items' in bulkMutation.data ? bulkMutation.data : null;
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[540px]">
+      <SheetContent className="sm:max-w-[640px]">
         <SheetHeader>
           <SheetTitle>
-            {operation === 'add' ? 'Add Tag' : 'Edit Tag'} ({selectedResourceIds.length} resources)
+            Add/Edit Tag ({selectedResourceIds.length} resources)
           </SheetTitle>
           <SheetDescription>
-            {operation === 'add'
-              ? 'Add a tag to all selected resources with the same value.'
-              : 'Edit a tag value for all selected resources.'}
+            Set the "{selectedTag}" tag value for all selected resources.
           </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label>Tag</Label>
-            <Select value={selectedTag} onValueChange={(value) => setSelectedTag(value as TagKey)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select tag" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableTags.map((tag) => (
-                  <SelectItem key={tag} value={tag}>
-                    {tag}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Value</Label>
+            {renderTagValueInput()}
           </div>
 
-          {selectedTag && (
-            <div className="space-y-2">
-              <Label>Value</Label>
-              {renderTagValueInput()}
+          {/* Summary message */}
+          {showPreview && previewData && (
+            <div className="rounded-md border p-3 bg-muted/50">
+              <p className="text-sm font-medium">
+                {previewData.summary.resourcesToUpdate} resource{previewData.summary.resourcesToUpdate !== 1 ? 's' : ''} will be updated.
+                {resourcesWithTag > 0 && (
+                  <span className="text-muted-foreground ml-1">
+                    {resourcesWithTag} already have this tag.
+                  </span>
+                )}
+              </p>
             </div>
           )}
 
-          {showPreview && bulkMutation.data && 'items' in bulkMutation.data && (
+          {/* Preview */}
+          {showPreview && previewData && (
             <div className="space-y-2">
               <Label>Preview</Label>
-              <div className="rounded-md border p-3 max-h-64 overflow-y-auto">
-                <div className="space-y-2">
-                  {bulkMutation.data.items.map((item: { resourceId: string; resourceName: string; existingTags: Tags; newTags: Tags }) => (
-                    <div key={item.resourceId} className="text-sm">
-                      <div className="font-medium">{item.resourceName}</div>
-                      <div className="text-muted-foreground">
-                        {selectedTag && item.existingTags[selectedTag] ? (
-                          <>
-                            <span className="line-through">{String(item.existingTags[selectedTag])}</span>
-                            {' → '}
-                            <span className="font-medium">{String(item.newTags[selectedTag])}</span>
-                          </>
-                        ) : selectedTag ? (
-                          <span className="font-medium">+ {String(item.newTags[selectedTag])}</span>
-                        ) : null}
+              <div className="rounded-md border p-3 max-h-96 overflow-y-auto">
+                <div className="space-y-4">
+                  {previewData.items.map((item: { resourceId: string; resourceName: string; existingTags: Tags; newTags: Tags }) => (
+                    <div key={item.resourceId} className="text-sm border-b last:border-b-0 pb-3 last:pb-0">
+                      <div className="font-medium mb-2">{item.resourceName}</div>
+                      <div className="space-y-1 text-muted-foreground">
+                        <div>
+                          <span className="font-medium">Current tags:</span>{' '}
+                          {formatTagsForDisplay(item.existingTags)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Tags after save:</span>{' '}
+                          {formatTagsForDisplay(item.newTags)}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -306,24 +440,14 @@ export function BulkEditSheet({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          {!showPreview ? (
-            <Button
-              onClick={handlePreview}
-              disabled={!selectedTag || !tagValue.trim() || bulkMutation.isPending}
-            >
-              Preview
-            </Button>
-          ) : (
-            <Button
-              onClick={handleApply}
-              disabled={bulkMutation.isPending}
-            >
-              {bulkMutation.isPending ? 'Applying...' : 'Apply'}
-            </Button>
-          )}
+          <Button
+            onClick={handleApply}
+            disabled={!tagValue.trim() || bulkMutation.isPending}
+          >
+            {bulkMutation.isPending ? 'Applying...' : 'Apply'}
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   );
 }
-

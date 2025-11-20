@@ -58,7 +58,7 @@ export interface Resource {
 }
 
 export interface ResourceWithCoverage extends Resource {
-  tagCoverage: number; // Percentage 0-100
+  tagCoverage: number; // Count of tags present (0-5, rounded down from total if more than 5)
 }
 
 // API Response Models

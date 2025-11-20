@@ -4,6 +4,13 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { X, Edit, Plus, Save } from 'lucide-react';
 import type { ResourceWithCoverage, TagKey, Tags, EnvironmentValue, BusinessUnitValue } from '@spotto/types';
 import { Environment, BusinessUnit } from '@spotto/types';
@@ -44,6 +51,7 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
   const [editingTag, setEditingTag] = useState<TagKey | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [addTagOpen, setAddTagOpen] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState<Record<TagKey, boolean>>({});
   
   const updateTagsMutation = useUpdateResourceTags();
   const removeTagMutation = useRemoveResourceTag();
@@ -61,21 +69,23 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
   const handleStartEdit = (tagKey: TagKey, currentValue: string | undefined) => {
     setEditingTag(tagKey);
     setEditValue(currentValue || '');
+    setPopoverOpen({ ...popoverOpen, [tagKey]: true });
   };
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = (tagKey: TagKey) => {
     setEditingTag(null);
     setEditValue('');
+    setPopoverOpen({ ...popoverOpen, [tagKey]: false });
   };
 
-  const handleSave = async () => {
-    if (!editingTag || !editValue.trim()) {
+  const handleSave = async (tagKey: TagKey) => {
+    if (!editValue.trim()) {
       return;
     }
 
     const updatedTags: Tags = {
       ...resource.tags,
-      [editingTag]: editValue.trim() as any,
+      [tagKey]: editValue.trim() as any,
     };
 
     try {
@@ -85,8 +95,8 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
       });
       setEditingTag(null);
       setEditValue('');
+      setPopoverOpen({ ...popoverOpen, [tagKey]: false });
     } catch (error) {
-      // Error handling is done by the mutation
       console.error('Failed to update tag:', error);
     }
   };
@@ -94,6 +104,7 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
   const handleAddValue = (tagKey: TagKey) => {
     setEditingTag(tagKey);
     setEditValue('');
+    setPopoverOpen({ ...popoverOpen, [tagKey]: true });
   };
 
   const handleRemoveTag = async (tagKey: TagKey) => {
@@ -107,44 +118,45 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
     }
   };
 
-  const handleAddOptionalTag = async (tagKey: TagKey) => {
+  const handleAddOptionalTag = (tagKey: TagKey) => {
     setAddTagOpen(false);
     setEditingTag(tagKey);
     setEditValue('');
+    setPopoverOpen({ ...popoverOpen, [tagKey]: true });
   };
 
   const renderTagInput = (tagKey: TagKey) => {
     if (tagKey === 'Environment') {
       return (
-        <select
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="">Select environment</option>
+        <Select value={editValue} onValueChange={setEditValue}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select environment" />
+          </SelectTrigger>
+          <SelectContent>
           {ENVIRONMENT_OPTIONS.map((env) => (
-            <option key={env} value={env}>
+              <SelectItem key={env} value={env}>
               {env}
-            </option>
+              </SelectItem>
           ))}
-        </select>
+          </SelectContent>
+        </Select>
       );
     }
 
     if (tagKey === 'BusinessUnit') {
       return (
-        <select
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="">Select business unit</option>
+        <Select value={editValue} onValueChange={setEditValue}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select business unit" />
+          </SelectTrigger>
+          <SelectContent>
           {BUSINESS_UNIT_OPTIONS.map((bu) => (
-            <option key={bu} value={bu}>
+              <SelectItem key={bu} value={bu}>
               {bu}
-            </option>
+              </SelectItem>
           ))}
-        </select>
+          </SelectContent>
+        </Select>
       );
     }
 
@@ -155,9 +167,9 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
         placeholder={`Enter ${tagKey} value`}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
-            handleSave();
+            handleSave(tagKey);
           } else if (e.key === 'Escape') {
-            handleCancelEdit();
+            handleCancelEdit(tagKey);
           }
         }}
       />
@@ -179,6 +191,7 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                 const value = resource.tags[key];
                 const isEditing = editingTag === key;
                 const hasValue = value !== undefined && value !== null && value !== '';
+                const isOpen = popoverOpen[key] || false;
 
                 return (
                   <div key={key} className="flex items-start justify-between gap-2">
@@ -186,38 +199,62 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                       {key}
                     </dt>
                     <dd className="flex-1">
-                      {isEditing ? (
+                      {hasValue ? (
+                        <Popover open={isOpen} onOpenChange={(open) => {
+                          setPopoverOpen({ ...popoverOpen, [key]: open });
+                          if (!open) {
+                            setEditingTag(null);
+                            setEditValue('');
+                          }
+                        }}>
+                          <PopoverTrigger asChild>
+                            <button
+                              className="flex items-center gap-2 text-sm hover:underline"
+                              onClick={() => handleStartEdit(key, value)}
+                            >
+                              <span>{String(value)}</span>
+                              <Edit className="h-3 w-3 opacity-50" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                                  {key}
+                                </label>
+                                {renderTagInput(key)}
+                              </div>
                         <div className="flex items-center gap-2">
-                          {renderTagInput(key)}
                           <Button
                             size="sm"
-                            onClick={handleSave}
+                                  onClick={() => handleSave(key)}
                             disabled={!editValue.trim() || updateTagsMutation.isPending}
+                                  className="flex-1"
                           >
-                            <Save className="h-4 w-4" />
+                                  <Save className="h-3 w-3 mr-1" />
+                                  Save
                           </Button>
                           <Button
                             size="sm"
-                            variant="ghost"
-                            onClick={handleCancelEdit}
+                                  variant="outline"
+                                  onClick={() => handleCancelEdit(key)}
                             disabled={updateTagsMutation.isPending}
                           >
                             Cancel
                           </Button>
                         </div>
-                      ) : hasValue ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{String(value)}</span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleStartEdit(key, value)}
-                            disabled={updateTagsMutation.isPending || removeTagMutation.isPending}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
                         </div>
+                          </PopoverContent>
+                        </Popover>
                       ) : (
+                        <Popover open={isOpen} onOpenChange={(open) => {
+                          setPopoverOpen({ ...popoverOpen, [key]: open });
+                          if (!open) {
+                            setEditingTag(null);
+                            setEditValue('');
+                          }
+                        }}>
+                          <PopoverTrigger asChild>
                         <Button
                           size="sm"
                           variant="outline"
@@ -227,6 +264,37 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                           <Plus className="h-3 w-3 mr-1" />
                           Add value
                         </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <div>
+                                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                                  {key}
+                                </label>
+                                {renderTagInput(key)}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSave(key)}
+                                  disabled={!editValue.trim() || updateTagsMutation.isPending}
+                                  className="flex-1"
+                                >
+                                  <Save className="h-3 w-3 mr-1" />
+                                  Save
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleCancelEdit(key)}
+                                  disabled={updateTagsMutation.isPending}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       )}
                     </dd>
                   </div>
@@ -276,6 +344,7 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                 {optionalTags.map((key) => {
                   const value = resource.tags[key];
                   const isEditing = editingTag === key;
+                  const isOpen = popoverOpen[key] || false;
 
                   return (
                     <div key={key} className="flex items-start justify-between gap-2">
@@ -283,36 +352,53 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                         {key}
                       </dt>
                       <dd className="flex-1">
-                        {isEditing ? (
                           <div className="flex items-center gap-2">
+                          <Popover open={isOpen} onOpenChange={(open) => {
+                            setPopoverOpen({ ...popoverOpen, [key]: open });
+                            if (!open) {
+                              setEditingTag(null);
+                              setEditValue('');
+                            }
+                          }}>
+                            <PopoverTrigger asChild>
+                              <button
+                                className="flex items-center gap-2 text-sm hover:underline"
+                                onClick={() => handleStartEdit(key, value)}
+                              >
+                                <span>{String(value)}</span>
+                                <Edit className="h-3 w-3 opacity-50" />
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80">
+                              <div className="space-y-3">
+                                <div>
+                                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                                    {key}
+                                  </label>
                             {renderTagInput(key)}
+                                </div>
+                                <div className="flex items-center gap-2">
                             <Button
                               size="sm"
-                              onClick={handleSave}
+                                    onClick={() => handleSave(key)}
                               disabled={!editValue.trim() || updateTagsMutation.isPending}
+                                    className="flex-1"
                             >
-                              <Save className="h-4 w-4" />
+                                    <Save className="h-3 w-3 mr-1" />
+                                    Save
                             </Button>
                             <Button
                               size="sm"
-                              variant="ghost"
-                              onClick={handleCancelEdit}
+                                    variant="outline"
+                                    onClick={() => handleCancelEdit(key)}
                               disabled={updateTagsMutation.isPending}
                             >
                               Cancel
                             </Button>
                           </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">{String(value)}</span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleStartEdit(key, value)}
-                              disabled={updateTagsMutation.isPending || removeTagMutation.isPending}
-                            >
-                              <Edit className="h-3 w-3" />
-                            </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                             <Button
                               size="sm"
                               variant="ghost"
@@ -322,7 +408,6 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                               <X className="h-3 w-3" />
                             </Button>
                           </div>
-                        )}
                       </dd>
                     </div>
                   );
@@ -333,24 +418,49 @@ export function ResourceTagsCard({ resource }: ResourceTagsCardProps) {
                       {editingTag}
                     </dt>
                     <dd className="flex-1">
+                      <Popover open={popoverOpen[editingTag] || false} onOpenChange={(open) => {
+                        setPopoverOpen({ ...popoverOpen, [editingTag]: open });
+                        if (!open) {
+                          setEditingTag(null);
+                          setEditValue('');
+                        }
+                      }}>
+                        <PopoverTrigger asChild>
+                          <Button size="sm" variant="outline">
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add value
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80">
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                                {editingTag}
+                              </label>
+                              {renderTagInput(editingTag)}
+                            </div>
                       <div className="flex items-center gap-2">
-                        {renderTagInput(editingTag)}
                         <Button
                           size="sm"
-                          onClick={handleSave}
+                                onClick={() => handleSave(editingTag)}
                           disabled={!editValue.trim() || updateTagsMutation.isPending}
+                                className="flex-1"
                         >
-                          <Save className="h-4 w-4" />
+                                <Save className="h-3 w-3 mr-1" />
+                                Save
                         </Button>
                         <Button
                           size="sm"
-                          variant="ghost"
-                          onClick={handleCancelEdit}
+                                variant="outline"
+                                onClick={() => handleCancelEdit(editingTag)}
                           disabled={updateTagsMutation.isPending}
                         >
                           Cancel
                         </Button>
                       </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </dd>
                   </div>
                 )}

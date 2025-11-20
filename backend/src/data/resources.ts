@@ -32,6 +32,21 @@ export function updateResourceTags(id: string, tags: Resource['tags']): Resource
 }
 
 /**
+ * Remove a tag from a resource
+ */
+export function removeResourceTag(id: string, tagKey: keyof Resource['tags']): Resource | null {
+  const resource = resources.find((r) => r.id === id);
+  if (!resource) {
+    return null;
+  }
+
+  const updatedTags = { ...resource.tags };
+  delete updatedTags[tagKey];
+  resource.tags = updatedTags;
+  return { ...resource };
+}
+
+/**
  * Update multiple resources' tags (bulk operation)
  */
 export function bulkUpdateResourceTags(
@@ -51,6 +66,35 @@ export function bulkUpdateResourceTags(
     // Merge tags: tagsToAdd overwrites existing tags
     resource.tags = { ...resource.tags, ...tagsToAdd };
     updated.push({ ...resource });
+  }
+
+  return { updated, errors };
+}
+
+/**
+ * Remove a tag from multiple resources (bulk operation)
+ */
+export function bulkRemoveResourceTags(
+  resourceIds: string[],
+  tagKey: keyof Resource['tags']
+): { updated: Resource[]; errors: Array<{ resourceId: string; error: string }> } {
+  const updated: Resource[] = [];
+  const errors: Array<{ resourceId: string; error: string }> = [];
+
+  for (const resourceId of resourceIds) {
+    const resource = resources.find((r) => r.id === resourceId);
+    if (!resource) {
+      errors.push({ resourceId, error: 'Resource not found' });
+      continue;
+    }
+
+    // Remove the tag if it exists
+    if (resource.tags[tagKey]) {
+      const updatedTags = { ...resource.tags };
+      delete updatedTags[tagKey];
+      resource.tags = updatedTags;
+      updated.push({ ...resource });
+    }
   }
 
   return { updated, errors };

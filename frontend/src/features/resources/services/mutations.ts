@@ -22,11 +22,11 @@ export function useUpdateResourceTags() {
     },
     onSuccess: (data, variables) => {
       // Invalidate and refetch resource queries
-      queryClient.invalidateQueries({ queryKey: ['resources', variables.resourceId] });
+      queryClient.invalidateQueries({ queryKey: ['resource', variables.resourceId] });
       queryClient.invalidateQueries({ queryKey: ['resources'] });
       
       // Optimistically update the cache
-      queryClient.setQueryData(['resources', variables.resourceId], {
+      queryClient.setQueryData(['resource', variables.resourceId], {
         resource: data.resource,
       });
     },
@@ -41,27 +41,21 @@ export function useRemoveResourceTag() {
 
   return useMutation({
     mutationFn: async ({ resourceId, tagKey }: { resourceId: string; tagKey: TagKey }) => {
-      // Get current resource to remove the tag
-      const currentResource = await getResource(resourceId);
-      const updatedTags = { ...currentResource.resource.tags };
-      delete updatedTags[tagKey];
-
       const response = await apiRequest<UpdateResourceTagsResponse>(
-        `/resources/${resourceId}/tags`,
+        `/resources/${resourceId}/tags/${tagKey}`,
         {
-          method: 'PATCH',
-          body: JSON.stringify(updatedTags),
+          method: 'DELETE',
         }
       );
       return response;
     },
     onSuccess: (data, variables) => {
       // Invalidate and refetch resource queries
-      queryClient.invalidateQueries({ queryKey: ['resources', variables.resourceId] });
+      queryClient.invalidateQueries({ queryKey: ['resource', variables.resourceId] });
       queryClient.invalidateQueries({ queryKey: ['resources'] });
       
       // Optimistically update the cache
-      queryClient.setQueryData(['resources', variables.resourceId], {
+      queryClient.setQueryData(['resource', variables.resourceId], {
         resource: data.resource,
       });
     },
@@ -97,7 +91,43 @@ export function useBulkAddEditTag() {
         queryClient.invalidateQueries({ queryKey: ['resources'] });
         // Invalidate individual resource queries
         variables.resourceIds.forEach((id) => {
-          queryClient.invalidateQueries({ queryKey: ['resources', id] });
+          queryClient.invalidateQueries({ queryKey: ['resource', id] });
+        });
+      }
+    },
+  });
+}
+
+/**
+ * Mutation hook for bulk remove tag operations
+ */
+export function useBulkRemoveTag() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ resourceIds, tagKey, preview = false }: { resourceIds: string[]; tagKey: TagKey; preview?: boolean }) => {
+      const requestBody = {
+        resourceIds,
+        tagKey,
+        preview,
+      };
+
+      const response = await apiRequest<BulkTagPreview | BulkTagResponse>(
+        '/resources/bulk-tag',
+        {
+          method: 'DELETE',
+          body: JSON.stringify(requestBody),
+        }
+      );
+      return response;
+    },
+    onSuccess: (_data, variables) => {
+      // Only invalidate if not in preview mode
+      if (!variables.preview) {
+        queryClient.invalidateQueries({ queryKey: ['resources'] });
+        // Invalidate individual resource queries
+        variables.resourceIds.forEach((id) => {
+          queryClient.invalidateQueries({ queryKey: ['resource', id] });
         });
       }
     },

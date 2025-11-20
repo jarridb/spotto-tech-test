@@ -5,18 +5,16 @@ interface TagCoverageBadgeProps {
   resource: ResourceWithCoverage;
 }
 
-const REQUIRED_TAGS_COUNT = 3;
+const TOTAL_TAGS_DISPLAY = 5;
 
 export function TagCoverageBadge({ resource }: TagCoverageBadgeProps) {
-  const { tagCoverage } = resource;
-  const isCompliant = tagCoverage === 100;
-  
-  // Calculate number of required tags present
-  const presentTagsCount = Math.round((tagCoverage / 100) * REQUIRED_TAGS_COUNT);
+  // tagCoverage now represents the count of tags present (up to 5)
+  const presentTagsCount = resource.tagCoverage;
+  const isCompliant = presentTagsCount >= 5; // 3 required + 2 optional minimum
 
   return (
     <Badge variant={isCompliant ? 'success' : 'error'}>
-      {presentTagsCount}/{REQUIRED_TAGS_COUNT} required tags
+      {presentTagsCount}/{TOTAL_TAGS_DISPLAY} tags
     </Badge>
   );
 }

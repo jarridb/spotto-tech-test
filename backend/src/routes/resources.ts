@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { ResourceListQuerySchema } from '../schemas/query-schemas.js';
 import { TagsSchema } from '../schemas/tag-schemas.js';
 import { BulkTagRequestSchema } from '../schemas/resource-schemas.js';
-import { getResourceById, updateResourceTags, bulkUpdateResourceTags } from '../data/resources.js';
+import type { TagKey } from '@spotto/types';
+import { getResourceById, updateResourceTags, removeResourceTag, bulkUpdateResourceTags, bulkRemoveResourceTags } from '../data/resources.js';
 import { getFilteredAndSortedResources } from '../services/resource-service.js';
 import { addTagCoverageToResources } from '../services/coverage-service.js';
 import { Provider } from '@spotto/types';
@@ -120,6 +121,48 @@ router.patch('/:id/tags', (req, res) => {
   });
 });
 
+// DELETE /api/resources/:id/tags/:tagKey - Remove a tag from a resource
+router.delete('/:id/tags/:tagKey', (req, res) => {
+  const { id, tagKey } = req.params;
+
+  // Validate resource ID
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    return res.status(400).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid resource ID',
+      },
+    });
+  }
+
+  // Validate tag key
+  const validTagKeys: TagKey[] = ['Environment', 'Owner', 'BusinessUnit', 'CostCenter', 'Project', 'Customer'];
+  if (!tagKey || !validTagKeys.includes(tagKey as TagKey)) {
+    return res.status(400).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid tag key',
+      },
+    });
+  }
+
+  // Remove tag from resource
+  const updatedResource = removeResourceTag(id, tagKey as TagKey);
+
+  if (!updatedResource) {
+    return res.status(404).json({
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Resource not found',
+      },
+    });
+  }
+
+  res.json({
+    resource: updatedResource,
+  });
+});
+
 // POST /api/resources/bulk-tag - Bulk tag operations
 router.post('/bulk-tag', (req, res) => {
   // Validate request body with Zod
@@ -162,6 +205,71 @@ router.post('/bulk-tag', (req, res) => {
 
   // Perform bulk update
   const { updated, errors } = bulkUpdateResourceTags(resourceIds, tagsToAdd);
+
+  res.json({
+    success: errors.length === 0,
+    updated: updated.length,
+    errors: errors.length > 0 ? errors : undefined,
+  });
+});
+
+// DELETE /api/resources/bulk-tag - Bulk remove tag operations
+router.delete('/bulk-tag', (req, res) => {
+  // Validate request body
+  const { resourceIds, tagKey, preview } = req.body;
+
+  if (!Array.isArray(resourceIds) || resourceIds.length === 0) {
+    return res.status(400).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'resourceIds must be a non-empty array',
+      },
+    });
+  }
+
+  const validTagKeys: TagKey[] = ['Environment', 'Owner', 'BusinessUnit', 'CostCenter', 'Project', 'Customer'];
+  if (!tagKey || !validTagKeys.includes(tagKey)) {
+    return res.status(400).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid tag key',
+      },
+    });
+  }
+
+  // If preview mode, return preview without making changes
+  if (preview) {
+    const previewItems = resourceIds.map((resourceId: string) => {
+      const resource = getResourceById(resourceId);
+      const existingTags = resource?.tags || {};
+      const newTags = { ...existingTags };
+      delete newTags[tagKey as TagKey];
+
+      return {
+        resourceId,
+        resourceName: resource?.name || 'Unknown',
+        existingTags,
+        newTags,
+      };
+    });
+
+    const resourcesToUpdate = previewItems.filter((item: { existingTags: Record<string, unknown> }) => 
+      item.existingTags[tagKey] !== undefined
+    ).length;
+
+    return res.json({
+      items: previewItems,
+      summary: {
+        totalResources: resourceIds.length,
+        resourcesToUpdate,
+        tagsToAdd: 0,
+        tagsToRemove: 1,
+      },
+    });
+  }
+
+  // Perform bulk remove
+  const { updated, errors } = bulkRemoveResourceTags(resourceIds, tagKey as TagKey);
 
   res.json({
     success: errors.length === 0,

@@ -70,6 +70,12 @@ export function ResourceRow({ resource, selected = false, onSelect }: ResourceRo
       <TableCell>
         <TagCoverageBadge resource={resource} />
       </TableCell>
+      <TableCell>{resource.tags.Environment || ''}</TableCell>
+      <TableCell>{resource.tags.Owner || ''}</TableCell>
+      <TableCell>{resource.tags.BusinessUnit || ''}</TableCell>
+      <TableCell>{resource.tags.CostCenter || ''}</TableCell>
+      <TableCell>{resource.tags.Project || ''}</TableCell>
+      <TableCell>{resource.tags.Customer || ''}</TableCell>
     </TableRow>
   );
 }

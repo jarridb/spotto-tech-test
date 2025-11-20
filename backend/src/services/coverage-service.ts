@@ -18,21 +18,18 @@ function isTagPresent(tagValue: unknown): boolean {
 }
 
 /**
- * Calculate tag coverage percentage for a resource
- * Returns a value between 0 and 100
- * Based on required tags only (for display purposes)
+ * Calculate tag coverage count for a resource
+ * Returns the count of tags present (up to 5 total for display)
+ * Resources can have more than 5 tags, but display rounds down to 5
  */
 export function calculateTagCoverage(resource: Resource): number {
-  const requiredTagsCount = REQUIRED_TAGS.length;
-  const presentTagsCount = REQUIRED_TAGS.filter((tag) => {
+  const allTags = [...REQUIRED_TAGS, ...OPTIONAL_TAGS];
+  const presentTagsCount = allTags.filter((tag) => {
     return isTagPresent(resource.tags[tag]);
   }).length;
 
-  if (requiredTagsCount === 0) {
-    return 100;
-  }
-
-  return Math.round((presentTagsCount / requiredTagsCount) * 100);
+  // Round down to 5 for display purposes (X/5 tags format)
+  return Math.min(presentTagsCount, 5);
 }
 
 /**

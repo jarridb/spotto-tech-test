@@ -154,6 +154,12 @@ export function ResourceTable({
           >
             Tag Coverage
           </SortableHeader>
+          <TableHead>Environment</TableHead>
+          <TableHead>Owner</TableHead>
+          <TableHead>BusinessUnit</TableHead>
+          <TableHead>CostCenter</TableHead>
+          <TableHead>Project</TableHead>
+          <TableHead>Customer</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

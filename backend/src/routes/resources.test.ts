@@ -13,6 +13,7 @@ vi.mock('../data/resources.js', () => ({
   getAllResources: vi.fn(),
   getResourceById: vi.fn(),
   updateResourceTags: vi.fn(),
+  removeResourceTag: vi.fn(),
   bulkUpdateResourceTags: vi.fn(),
 }));
 
@@ -27,12 +28,13 @@ vi.mock('../services/coverage-service.js', () => ({
 }));
 
 function calculateMockCoverage(resource: Resource): number {
-  const requiredTags = ['Environment', 'Owner', 'BusinessUnit'];
-  const presentTags = requiredTags.filter((tag) => {
+  const allTags = ['Environment', 'Owner', 'BusinessUnit', 'CostCenter', 'Project', 'Customer'];
+  const presentTags = allTags.filter((tag) => {
     const value = resource.tags[tag as keyof typeof resource.tags];
     return value !== undefined && value !== null && value !== '';
   });
-  return Math.round((presentTags.length / requiredTags.length) * 100);
+  // Return count of tags present (up to 5 for display)
+  return Math.min(presentTags.length, 5);
 }
 
 // Create test app
@@ -93,8 +95,8 @@ describe('GET /api/resources', () => {
     expect(response.body).toHaveProperty('total', 2);
     expect(response.body.resources).toHaveLength(2);
     expect(response.body.resources[0]).toHaveProperty('tagCoverage');
-    expect(response.body.resources[0].tagCoverage).toBe(67); // 2/3 required tags
-    expect(response.body.resources[1].tagCoverage).toBe(100); // 3/3 required tags
+    expect(response.body.resources[0].tagCoverage).toBe(2); // 2 tags present
+    expect(response.body.resources[1].tagCoverage).toBe(3); // 3 tags present
   });
 
   it('should filter by provider (single-select)', async () => {
@@ -356,7 +358,7 @@ describe('GET /api/resources/:id', () => {
 
     const mockResourceWithCoverage: ResourceWithCoverage = {
       ...mockResource,
-      tagCoverage: 67,
+      tagCoverage: 2, // 2 tags present (Environment, Owner)
     };
 
     vi.mocked(resourcesData.getResourceById).mockReturnValue(mockResource);
@@ -369,7 +371,7 @@ describe('GET /api/resources/:id', () => {
     expect(response.body).toHaveProperty('resource');
     expect(response.body.resource.id).toBe('vm-prod-web-001');
     expect(response.body.resource.name).toBe('web-server-prod-east');
-    expect(response.body.resource.tagCoverage).toBe(67);
+    expect(response.body.resource.tagCoverage).toBe(2); // 2 tags present
     expect(resourcesData.getResourceById).toHaveBeenCalledWith('vm-prod-web-001');
     expect(coverageService.addTagCoverageToResources).toHaveBeenCalledWith([mockResource]);
   });
@@ -531,6 +533,83 @@ describe('PATCH /api/resources/:id/tags', () => {
     expect(response.status).toBe(200);
     expect(response.body.resource.tags.Project).toBe('TestProject');
     expect(response.body.resource.tags.CostCenter).toBe('IT-001');
+  });
+});
+
+describe('DELETE /api/resources/:id/tags/:tagKey', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should remove a tag from a resource successfully', async () => {
+    const updatedResource: Resource = {
+      id: 'vm-prod-web-001',
+      name: 'web-server-prod-east',
+      type: 'Virtual Machine',
+      provider: Provider.Azure,
+      region: 'eastus',
+      monthlyCost: 245.5,
+      tags: {
+        Environment: 'Production',
+        Owner: 'platform-team',
+        // Project tag removed
+      },
+    };
+
+    vi.mocked(resourcesData.removeResourceTag).mockReturnValue(updatedResource);
+
+    const app = createTestApp();
+    const response = await request(app).delete('/api/resources/vm-prod-web-001/tags/Project');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('resource');
+    expect(response.body.resource.tags.Project).toBeUndefined();
+    expect(resourcesData.removeResourceTag).toHaveBeenCalledWith('vm-prod-web-001', 'Project');
+  });
+
+  it('should return 400 for invalid tag key', async () => {
+    const app = createTestApp();
+    const response = await request(app).delete('/api/resources/vm-prod-web-001/tags/InvalidTag');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toHaveProperty('code', 'VALIDATION_ERROR');
+    expect(response.body.error).toHaveProperty('message', 'Invalid tag key');
+  });
+
+  it('should return 404 for non-existent resource', async () => {
+    vi.mocked(resourcesData.removeResourceTag).mockReturnValue(null);
+
+    const app = createTestApp();
+    const response = await request(app).delete('/api/resources/nonexistent-id/tags/Project');
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toHaveProperty('code', 'NOT_FOUND');
+    expect(response.body.error).toHaveProperty('message', 'Resource not found');
+  });
+
+  it('should allow removing optional tags', async () => {
+    const updatedResource: Resource = {
+      id: 'vm-prod-web-001',
+      name: 'web-server-prod-east',
+      type: 'Virtual Machine',
+      provider: Provider.Azure,
+      region: 'eastus',
+      monthlyCost: 245.5,
+      tags: {
+        Environment: 'Production',
+        Owner: 'platform-team',
+        BusinessUnit: 'Engineering',
+        // CostCenter removed
+      },
+    };
+
+    vi.mocked(resourcesData.removeResourceTag).mockReturnValue(updatedResource);
+
+    const app = createTestApp();
+    const response = await request(app).delete('/api/resources/vm-prod-web-001/tags/CostCenter');
+
+    expect(response.status).toBe(200);
+    expect(response.body.resource.tags.CostCenter).toBeUndefined();
   });
 });
 

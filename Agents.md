@@ -30,7 +30,6 @@
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
 
-
 ### 4. Refine spec.md
 
 **Prompt:** 'Review the spec.md and refine it and flesh out the details'
@@ -77,5 +76,40 @@
 
 **Prompt:** '/speckit.implement @002-resources-list using a MVP First strategy delivering each phase as a commit which I can review before going to the next phase. Prompt me to continue or request prompts to change'
 **Tool:** Cursor
-**Result:** Updated Spec.md
-**Time Saved:** ~8 hour
+**Result:** 002-resources-list spec
+**Time Saved:** ~3 hour
+
+### 10. Fixes and Bugfixes for resources implementation
+
+**Prompt:** `
+/speckit.specify
+Please review and update the implementation of @002-resources-list to address the following issues across bulk add/edit, delete, and detail views:
+
+- The coverage tag should show x/5 tags, not 3 (3 required + 2 optional).
+- Each tag should have its own column in the list.
+- Add, edit, and delete should use popovers like the filters, listing available tags (already added tags should appear but be greyed out).
+- The remove tag functionality should have a backend DELETE endpoint and work as intended.
+- In bulk mode, show previews as soon as a tag value is edited (before save).
+- The endpoints for the detail view should be working and reflect updates immediately.
+- Combine add/edit actions into a single button, with options split into 2 groups: Required and Optional (all tags shown).
+- Bulk remove actions should show a menu split for optional tags only, and only optional tags present among selected resources should be shown.
+- Bulk edit buttons above the table should use dropdown menus (no greyed out options).
+- Both add/edit and delete sheets should not include tag type selects—the tag is selected via the button that opens the sheet.
+- Resources should not update until the user hits "Apply".
+- For add/edit sheets, show a preview of tag changes for each resource, including:
+  - A message like: "5 resources will be updated, 2 already have this tag" or "5 resources will be updated" if none have it.
+  - Under each resource, display what the tags will be after saving.
+- For delete tag modals, show a message: "5 resources will be updated, x do not have this tag".
+- On detail pages, clicking edit or a tag value should open a popover for editing and saving that tag.
+
+Additionally, address the following bugs with bulk add/edit and delete:
+
+1. Fix issue where opening the sheet for add/edit with an enum value causes immediate submission and continuous rerendering (preview should show before any submission).
+2. Fix issue where opening the sheet for add/edit with a string value causes continuous rerender and prevents preview.
+3. Fix issue where opening the modal for delete causes immediate submission and rerendering with no preview.
+
+Open a browser session to confirm these fixes are effective.
+`
+**Tool:** Cursor  
+**Result:** 002-resources-list spec updated  
+**Time Saved:** ~4.5 hours

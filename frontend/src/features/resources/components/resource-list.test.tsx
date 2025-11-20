@@ -166,7 +166,7 @@ describe('ResourceList', () => {
           Environment: 'Production',
           Owner: 'platform-team',
         },
-        tagCoverage: 67,
+        tagCoverage: 2, // 2 tags present
       },
       {
         id: 'db-prod-sql-001',
@@ -180,7 +180,7 @@ describe('ResourceList', () => {
           Owner: 'data-team',
           BusinessUnit: 'Engineering',
         },
-        tagCoverage: 100,
+        tagCoverage: 3, // 3 tags present
       },
     ];
 
