@@ -72,3 +72,10 @@
 **Tool:** Cursor
 **Result:** Updated instructions, cors setup, vite setup, added .env example
 **Time Saved:** ~30 min
+
+### 8. Build the resources list
+
+**Prompt:** '/speckit.implement @002-resources-list using a MVP First strategy delivering each phase as a commit which I can review before going to the next phase. Prompt me to continue or request prompts to change'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~8 hour
