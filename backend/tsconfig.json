@@ -4,9 +4,8 @@
     "lib": ["ES2022"],
     "types": ["node"],
     "module": "ESNext",
-    "moduleResolution": "node",
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "moduleResolution": "bundler",
+    "outDir": "./dist"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

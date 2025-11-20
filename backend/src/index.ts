@@ -3,8 +3,6 @@ import { errorLogger } from './middleware/error-logger.js';
 import { corsMiddleware } from './middleware/cors.js';
 import healthRouter from './routes/health.js';
 import resourcesRouter from './routes/resources.js';
-import coverageRouter from './routes/coverage.js';
-import tagSchemaRouter from './routes/tag-schema.js';
 
 const app = express();
 const PORT = 3001;
@@ -16,8 +14,6 @@ app.use(express.json());
 // Routes
 app.use('/api', healthRouter);
 app.use('/api/resources', resourcesRouter);
-app.use('/api/coverage', coverageRouter);
-app.use('/api/tag-schema', tagSchemaRouter);
 
 // 404 handler
 app.use((req, res) => {

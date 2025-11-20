@@ -87,6 +87,8 @@ A resource is compliant if:
 - All 3 required tags are present and non-empty: Environment, Owner, BusinessUnit
 - At least 2 optional tags are present and non-empty
 
+**Note**: Resources can have more than 5 tags total, but compliance requires exactly 3 required + at least 2 optional tags. Coverage badge displays "X/5 tags" where X is the count of tags present (rounded down to 5 for display).
+
 ---
 
 ### TagSchema
@@ -123,17 +125,19 @@ interface TagSchemaDefinition {
 **Purpose**: Extends Resource with tag coverage information for list display.
 
 **Fields** (inherits all Resource fields plus):
-- `tagCoverage` (number, required): Percentage of required tags present (0-100)
+- `tagCoverage` (number, required): Count of tags present (up to 5 total, displayed as "X/5 tags")
 
 **Calculation**:
 ```
-tagCoverage = (presentRequiredTags / totalRequiredTags) * 100
+tagCoverage = min(presentTagsCount, 5)
 ```
 
-**Example**: If resource has Environment and Owner but missing BusinessUnit:
-- Present: 2 tags
-- Required: 3 tags
-- Coverage: 66.67%
+**Example**: If resource has Environment, Owner, BusinessUnit, CostCenter, Project, Customer:
+- Present: 6 tags total
+- Display: 5/5 tags (rounded down to 5)
+- Coverage badge: "5/5 tags"
+
+**Note**: Resources can have more than 5 tags total, but coverage badge displays up to 5. Compliance still requires exactly 3 required tags AND at least 2 optional tags regardless of total tag count.
 
 ---
 
@@ -457,9 +461,10 @@ type BusinessUnitValue = 'Engineering' | 'Sales' | 'Marketing' | 'Finance' | 'Op
 
 ### Coverage Calculation
 
-1. Resource coverage: (presentRequiredTags / 3) * 100
-2. Compliance: All 3 required tags AND at least 2 optional tags present and non-empty
-3. Cost-weighted compliance: (compliantCost / totalCost) * 100
+1. Resource coverage: Count of tags present (up to 5 total), displayed as "X/5 tags" format
+2. Coverage calculation: `min(presentTagsCount, 5)` - resources can have more than 5 tags but display rounds down to 5
+3. Compliance: All 3 required tags AND at least 2 optional tags present and non-empty (regardless of total tag count)
+4. Cost-weighted compliance: (compliantCost / totalCost) * 100
 
 ---
 

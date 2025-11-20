@@ -37,3 +37,16 @@
 - Success criteria are measurable and technology-agnostic
 - Edge cases cover common error scenarios and boundary conditions
 
+## Updates (2025-01-27)
+
+- **Coverage Badge**: Updated to show "X/5 tags" format (3 required + 2 optional) instead of "X/3 required tags"
+- **Tag Columns**: Ensured all tag columns (Environment, Owner, BusinessUnit, CostCenter, Project, Customer) are displayed in the table
+- **Tag Selection UI**: Updated to use popovers (like filters) for add/edit/remove operations, with tags split into Required and Optional groups
+- **Already Added Tags**: Tags already on resource are shown greyed out but still selectable in popovers
+- **DELETE Endpoint**: Ensured DELETE endpoint is properly specified and works for tag removal
+- **Bulk Preview**: Preview now displays immediately as user edits tag value (not just on button click)
+- **Detail View Endpoints**: Ensured GET /api/resources/:id endpoint works correctly and updates after tag operations
+- **Combined Add/Edit**: Add Tag and Edit Tag buttons combined into single "Add/Edit Tag" button
+- **Remove Tag Options**: Remove operation shows only optional tags used across selected resources in Optional group
+- **Coverage Calculation**: Updated to allow more than 5 tags total but round down to 5 for display. Compliance still requires 3 required + at least 2 optional tags
+

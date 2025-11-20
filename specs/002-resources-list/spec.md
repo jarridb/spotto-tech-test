@@ -9,10 +9,17 @@
 
 ### Session 2025-01-27
 
-- Q: Tag Coverage Badge Display Location - Should the tag coverage badge appear as a separate column, badge overlay, or only on hover? → A: As a separate "Tag Coverage" column in the table (showing "X/Y required tags"), display only (not clickable, no popover)
+- Q: Tag Coverage Badge Display Location - Should the tag coverage badge appear as a separate column, badge overlay, or only on hover? → A: As a separate "Tag Coverage" column in the table (showing "X/5 tags"), display only (not clickable, no popover)
 - Q: Filter Logic When Multiple Values Selected - When selecting multiple filter values within the same category, should the system show resources matching any value (OR), all values (AND), or only the most recent selection? → A: Only the most recently selected value (single selection only)
 - Q: "Select All" Checkbox Behavior - When clicking "Select all" checkbox, should it select all resources in system, all matching filters, or only currently visible resources? → A: Only resources currently visible in the filtered/sorted view
 - Q: Bulk Edit Tag Value Input - How should tag values be entered for bulk operations? → A: Single input field that applies the same value to all selected resources
+- Q: Tag Coverage Calculation - Should coverage be based on 3 required tags or 5 total tags (3 required + 2 optional)? → A: Coverage badge shows "X/5 tags" format, where X is the count of tags present (up to 5 total). Coverage calculation allows more than 5 tags total but rounds down to 5 for display. Compliance still requires 3 required tags AND at least 2 optional tags.
+- Q: Bulk Edit Tag Selection UI - How should tags be selected for bulk add/edit/remove operations? → A: Use popovers (like filters) that list available tags. For add/edit: show all tags split into Required and Optional groups, all tags shown normally and selectable. For remove: show only optional tags that are used across any selected resources, split into Optional group.
+- Q: Bulk Edit Actions - Should Add Tag and Edit Tag be separate buttons or combined? → A: Combined into a single "Add/Edit Tag" button
+- Q: Bulk Edit Preview - When should preview be shown in bulk operations? → A: Preview should be shown immediately as soon as user edits a tag value, before clicking Apply
+- Q: Tag Value Input UI for Enum Types - How should users enter values for enum-type tags (Environment, BusinessUnit) versus free-form tags? → A: Dropdown/select menu for enum-type tags (Environment, BusinessUnit), text input for free-form tags (Owner, CostCenter, Project, Customer)
+- Q: Preview Calculation Timing in Bulk Operations - When should preview be calculated when user edits tag value? → A: Calculate preview with debounce (300-500ms delay after typing stops) to reduce API calls while maintaining responsive feel
+- Q: Greyed-Out Tag Selection Behavior - Should already-added tags be greyed out in popovers? → A: No - all tags should be shown normally and selectable, regardless of whether they're already on the resource
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -27,7 +34,7 @@ A FinOps analyst opens the Resources page and sees a table displaying all cloud 
 **Acceptance Scenarios**:
 
 1. **Given** a FinOps analyst navigates to the Resources page, **When** the page loads, **Then** they see a table displaying all cloud resources with columns: Checkbox, Name, Type, Provider, Region, Monthly Cost, Tag Coverage, Environment, Owner, BusinessUnit, CostCenter, Project, Customer
-2. **Given** resources are displayed in the table, **When** a FinOps analyst views the Tag Coverage column, **Then** they see a badge showing "X/Y required tags" format for each resource
+2. **Given** resources are displayed in the table, **When** a FinOps analyst views the Tag Coverage column, **Then** they see a badge showing "X/5 tags" format for each resource (where X is the count of tags present, up to 5 total)
 3. **Given** resources are displayed in the table, **When** a resource has a tag value, **Then** the tag value appears in the corresponding tag column
 4. **Given** resources are displayed in the table, **When** a resource does not have a tag value, **Then** the corresponding tag column appears empty
 5. **Given** the resource list is displayed, **When** a FinOps analyst clicks on a resource row, **Then** they are navigated to the resource detail page
@@ -98,12 +105,14 @@ A FinOps analyst edits tags on a single resource's detail page, adding missing r
 **Acceptance Scenarios**:
 
 1. **Given** a FinOps analyst is viewing a resource detail page, **When** a required tag is missing, **Then** they see the tag name, a "not set" message, and an "Add value" button
-2. **Given** a FinOps analyst clicks "Add value" for a missing required tag, **When** the input field appears, **Then** they can enter a tag value and click Save to add the tag
-3. **Given** a FinOps analyst is viewing a resource with existing tags, **When** they click the Edit button for a tag, **Then** the tag value becomes an editable input field with a Save button
-4. **Given** a FinOps analyst edits a tag value, **When** they click Save, **Then** the tag is updated and the change is reflected immediately on the page
-5. **Given** a FinOps analyst is viewing optional tags, **When** they click the Remove button (X) for an optional tag, **Then** the tag is removed from the resource
-6. **Given** a FinOps analyst wants to add an optional tag, **When** they click "Add tag" under optional tags, **Then** a popover opens showing optional tags that are not yet on the resource
-7. **Given** a FinOps analyst selects an optional tag from the popover, **When** they enter a value and save, **Then** the tag is added to the resource
+2. **Given** a FinOps analyst clicks "Add value" for a missing required tag, **When** a popover opens, **Then** they see all tags listed in two groups (Required and Optional), all tags shown normally and selectable
+3. **Given** a FinOps analyst selects a tag from the popover, **When** the input field appears, **Then** they see a dropdown/select menu for enum tags (Environment, BusinessUnit) or a text input for free-form tags (Owner, CostCenter, Project, Customer), and can enter/select a value and click Save to add the tag
+4. **Given** a FinOps analyst is viewing a resource with existing tags, **When** they click the Edit button for a tag, **Then** a popover opens showing all tags in two groups (Required and Optional), with the current tag pre-selected
+5. **Given** a FinOps analyst selects a tag from the edit popover, **When** the input field appears with the current value, **Then** they see a dropdown/select menu (for enum tags) or text input (for free-form tags) with the current value pre-filled, and can modify the value and click Save to update the tag
+6. **Given** a FinOps analyst edits a tag value, **When** they click Save, **Then** the tag is updated via POST endpoint and the change is reflected immediately on the page
+7. **Given** a FinOps analyst is viewing optional tags, **When** they click the Remove button (X) for an optional tag, **Then** the tag is removed via DELETE endpoint and the change is reflected immediately
+8. **Given** a FinOps analyst wants to add an optional tag, **When** they click "Add tag" under optional tags, **Then** a popover opens showing all tags in two groups (Required and Optional), all tags shown normally and selectable
+9. **Given** a FinOps analyst selects a tag from the popover, **When** they enter a value and save, **Then** the tag is added to the resource via POST endpoint
 
 ---
 
@@ -119,14 +128,16 @@ A FinOps analyst selects multiple resources and performs bulk tag operations (ad
 
 1. **Given** a FinOps analyst is on the Resources list page, **When** they click the "Select all" checkbox in the table header, **Then** all resources currently visible in the filtered/sorted view are selected
 2. **Given** a FinOps analyst has filters applied, **When** they click "Select all", **Then** only resources matching the active filters are selected (not all resources in the system)
-3. **Given** a FinOps analyst is on the Resources list page, **When** they select 2 or more resources using checkboxes, **Then** bulk edit action buttons appear (Add Tag, Edit Tag, Remove Tag)
-4. **Given** a FinOps analyst has selected multiple resources, **When** they click "Add Tag", **Then** a dropdown opens showing tags that are not present on any selected resource
-5. **Given** a FinOps analyst selects a tag to add/edit/remove, **When** they proceed, **Then** a sheet opens showing a single input field for entering the tag value (for add/edit operations)
-6. **Given** a FinOps analyst enters a tag value in the bulk operation sheet, **When** they proceed, **Then** the same value is applied to all selected resources in the preview
+3. **Given** a FinOps analyst is on the Resources list page, **When** they select 2 or more resources using checkboxes, **Then** bulk edit action buttons appear (Add/Edit Tag, Remove Tag)
+4. **Given** a FinOps analyst has selected multiple resources, **When** they click "Add/Edit Tag", **Then** a popover opens showing all tags in two groups (Required and Optional), all tags shown normally and selectable
+5. **Given** a FinOps analyst selects a tag from the popover, **When** they proceed, **Then** a sheet opens showing a single input field (dropdown for enum tags, text input for free-form tags) for entering the tag value
+6. **Given** a FinOps analyst enters a tag value in the bulk operation sheet, **When** they type in the input field, **Then** a preview is displayed (with 300-500ms debounce after typing stops) showing how the change will affect each selected resource
 7. **Given** a FinOps analyst views the bulk operation preview, **When** they review the changes, **Then** they see each resource's current tags and new tags after the operation
-8. **Given** a FinOps analyst reviews the bulk operation preview, **When** they click Apply, **Then** the tag operation is applied to all selected resources with the entered value and the list updates to reflect changes
+8. **Given** a FinOps analyst reviews the bulk operation preview, **When** they click Apply, **Then** the tag operation is applied to all selected resources via POST endpoint and the list updates to reflect changes
 9. **Given** a FinOps analyst reviews the bulk operation preview, **When** they click Cancel, **Then** the sheet closes without making any changes
-10. **Given** a FinOps analyst performs a bulk remove operation, **When** they view the preview, **Then** they see a summary message indicating how many resources will be updated and how many did not have the tag
+10. **Given** a FinOps analyst clicks "Remove Tag", **When** the popover opens, **Then** they see only optional tags that are used across any selected resources, displayed in an Optional group
+11. **Given** a FinOps analyst selects a tag to remove, **When** they proceed, **Then** a preview is immediately displayed showing how the removal will affect each selected resource
+12. **Given** a FinOps analyst reviews the bulk remove preview, **When** they click Apply, **Then** the tag is removed from all selected resources via DELETE endpoint and the list updates to reflect changes
 
 ---
 
@@ -138,10 +149,35 @@ A FinOps analyst selects multiple resources and performs bulk tag operations (ad
 - **Invalid tag values**: When a user attempts to save an invalid tag value (e.g., invalid enum value for Environment), validation errors are displayed
 - **Concurrent tag updates**: When multiple users edit the same resource simultaneously, the last update wins (no conflict resolution needed for MVP)
 - **Resource not found**: When navigating to a resource detail page for a non-existent resource ID, a 404 error page is displayed
+- **Detail view endpoint updates**: GET /api/resources/:id endpoint must work correctly and return updated resource data after tag operations
+- **Tag coverage calculation**: Coverage badge shows "X/5 tags" where X is the count of tags present (up to 5 total). Resources can have more than 5 tags, but display rounds down to 5. Compliance still requires 3 required + at least 2 optional tags
 - **Large number of resources**: System handles displaying all 20 resources without pagination (pagination is out of scope for MVP)
 - **Missing required tags**: Resources with missing required tags are clearly indicated in the UI with appropriate visual indicators
 - **Empty tag values**: System prevents saving tags with empty string values
 - **Bulk operation on single resource**: Bulk edit actions appear when 2 or more resources are selected (not for single selection)
+
+### Known Bugs (Requiring Fixes)
+
+**Bug 1: Automatic Submission on Sheet Open for Add/Edit with Enum Values**
+
+- **Description**: When the bulk add/edit sheet opens for an enum-type tag (Environment, BusinessUnit), selecting a value from the dropdown immediately triggers a submission instead of showing a preview. The sheet continuously re-renders and the preview is never displayed.
+- **Impact**: Users cannot review changes before applying them for enum-type tags. The continuous re-rendering creates a poor user experience.
+- **Expected Behavior**: When a user selects an enum value from the dropdown, a preview should be displayed (with debounce) showing how the change will affect each selected resource. The operation should only be applied when the user clicks "Apply".
+- **Root Cause**: The Select component's `onValueChange` handler immediately updates `tagValue`, which triggers the preview useEffect. This may be causing the mutation to execute with `preview=false` instead of `preview=true`, or the debounce logic is not working correctly for enum selections.
+
+**Bug 2: Continuous Re-rendering on Sheet Open for Add/Edit with String Values**
+
+- **Description**: When the bulk add/edit sheet opens for a string-type tag (Owner, CostCenter, Project, Customer), the preview continuously re-renders as the user types, even with debounce logic in place.
+- **Impact**: Poor performance and user experience. The preview may flicker or become unresponsive during typing.
+- **Expected Behavior**: Preview should only be calculated after the user stops typing for 300-500ms (debounce). The preview should update smoothly without continuous re-renders.
+- **Root Cause**: The debounce logic in the useEffect may not be properly clearing previous timeouts, or the mutation is causing state updates that trigger re-renders in a loop.
+
+**Bug 3: Automatic Submission on Sheet Open for Delete Operation**
+
+- **Description**: When the bulk delete sheet opens, it immediately starts submitting to the delete endpoint and continuously re-renders. No preview is displayed as specified in the requirements.
+- **Impact**: Users cannot review which resources will be affected before confirming deletion. The operation may execute unintentionally.
+- **Expected Behavior**: When the delete sheet opens, a preview should be immediately displayed (without user input) showing how the tag removal will affect each selected resource. The operation should only be applied when the user clicks "Apply".
+- **Root Cause**: The useEffect for remove operations (lines 135-155) immediately calls `fetchPreview()` when the sheet opens, but the mutation may be executing with `preview=false` instead of `preview=true`, or the mutation is being called multiple times causing a re-render loop.
 
 ## Requirements *(mandatory)*
 
@@ -151,7 +187,8 @@ A FinOps analyst selects multiple resources and performs bulk tag operations (ad
 
 - **FR-001**: System MUST display all resources in a table format on the Resources list page
 - **FR-002**: System MUST display table columns: Checkbox, Name, Type, Provider, Region, Monthly Cost, Tag Coverage, Environment, Owner, BusinessUnit, CostCenter, Project, Customer
-- **FR-002a**: System MUST display Tag Coverage column showing "X/Y required tags" format for each resource (display only, not interactive)
+- **FR-002a**: System MUST display Tag Coverage column showing "X/5 tags" format for each resource (where X is the count of tags present, up to 5 total, display only, not interactive)
+- **FR-002b**: System MUST display individual columns for each tag: Environment, Owner, BusinessUnit, CostCenter, Project, Customer
 - **FR-003**: System MUST display tag values in their corresponding tag columns when present on a resource
 - **FR-004**: System MUST display empty tag columns when tags are not present on a resource
 - **FR-005**: System MUST enable navigation to resource detail page when clicking on a resource row
@@ -194,30 +231,35 @@ A FinOps analyst selects multiple resources and performs bulk tag operations (ad
 
 #### Task Group 5: Edit Tags on Resource Detail Page
 
-- **FR-032**: System MUST allow adding missing required tags on the resource detail page
-- **FR-033**: System MUST allow editing existing tag values on the resource detail page
-- **FR-034**: System MUST allow removing optional tags on the resource detail page
+- **FR-032**: System MUST allow adding missing required tags on the resource detail page via popover interface
+- **FR-033**: System MUST allow editing existing tag values on the resource detail page via popover interface
+- **FR-034**: System MUST allow removing optional tags on the resource detail page via DELETE endpoint
 - **FR-035**: System MUST validate tag values against the tag schema before saving
 - **FR-036**: System MUST display validation errors when invalid tag values are entered
-- **FR-037**: System MUST update the resource immediately after successful tag operations
+- **FR-037**: System MUST update the resource immediately after successful tag operations (POST for add/edit, DELETE for remove)
 - **FR-038**: System MUST prevent saving tags with empty string values
-- **FR-039**: System MUST display tag input fields in edit mode with Save button
-- **FR-040**: System MUST hide Remove button when a tag is in edit mode
+- **FR-039**: System MUST display tag selection popovers (like filters) with all tags split into Required and Optional groups
+- **FR-040**: System MUST display all tags in popovers normally (not greyed out), regardless of whether they're already on the resource
+- **FR-041**: System MUST ensure detail view endpoints (GET /api/resources/:id) work correctly and update after tag operations
+- **FR-042**: System MUST provide dropdown/select menu for entering enum-type tag values (Environment, BusinessUnit)
+- **FR-043**: System MUST provide text input for entering free-form tag values (Owner, CostCenter, Project, Customer)
 
 #### Task Group 6: Bulk Edit Tags on Resource List
 
-- **FR-041**: System MUST display bulk edit action buttons when 2 or more resources are selected
-- **FR-042**: System MUST provide "Add Tag", "Edit Tag", and "Remove Tag" bulk action buttons
-- **FR-043**: System MUST show only tags that are not present on any selected resource in the "Add Tag" dropdown
-- **FR-044**: System MUST show only tags that are present on at least one selected resource in the "Edit Tag" and "Remove Tag" dropdowns
-- **FR-045**: System MUST open a sheet component when a bulk tag operation is initiated
-- **FR-045a**: System MUST provide a single input field for entering tag value that applies to all selected resources in bulk operations
-- **FR-046**: System MUST display a preview of changes for each resource in the bulk operation sheet
-- **FR-047**: System MUST display summary messages indicating how many resources will be updated
-- **FR-048**: System MUST support preview mode for bulk operations before applying changes
-- **FR-049**: System MUST provide Apply and Cancel actions in the bulk operation sheet
-- **FR-050**: System MUST update all selected resources when Apply is clicked
-- **FR-051**: System MUST close the sheet without changes when Cancel is clicked
+- **FR-042**: System MUST display bulk edit action buttons when 2 or more resources are selected
+- **FR-043**: System MUST provide "Add/Edit Tag" (combined) and "Remove Tag" bulk action buttons
+- **FR-044**: System MUST open a popover when "Add/Edit Tag" is clicked, showing all tags split into Required and Optional groups
+- **FR-045**: System MUST display all tags in the popover normally (not greyed out), regardless of whether they're already on selected resources
+- **FR-046**: System MUST open a popover when "Remove Tag" is clicked, showing only optional tags that are used across any selected resources in an Optional group
+- **FR-047**: System MUST open a sheet component after tag selection in bulk operations
+- **FR-048**: System MUST provide a single input field (dropdown for enum tags, text input for free-form tags) for entering tag value that applies to all selected resources in bulk operations
+- **FR-049**: System MUST display a preview of changes with debounce (300-500ms delay after typing stops) when user edits a tag value in the input field
+- **FR-050**: System MUST display a preview showing each resource's current tags and new tags after the operation
+- **FR-051**: System MUST display summary messages indicating how many resources will be updated
+- **FR-052**: System MUST provide Apply and Cancel actions in the bulk operation sheet
+- **FR-053**: System MUST update all selected resources via POST endpoint when Apply is clicked for add/edit operations
+- **FR-054**: System MUST update all selected resources via DELETE endpoint when Apply is clicked for remove operations
+- **FR-055**: System MUST close the sheet without changes when Cancel is clicked
 
 ### Key Entities *(include if feature involves data)*
 
@@ -225,8 +267,8 @@ A FinOps analyst selects multiple resources and performs bulk tag operations (ad
 - **Tag**: Represents a metadata key-value pair attached to a resource (e.g., Environment: "Production", Owner: "platform-team")
 - **Required Tags**: Tags that must be present on all resources for compliance (Environment, Owner, BusinessUnit)
 - **Optional Tags**: Tags that may be present on resources but are not required (CostCenter, Project, Customer)
-- **Tag Coverage**: Percentage of required tags present on a resource (e.g., 2/3 required tags = 66.67% coverage)
-- **Compliance Status**: Boolean indicating whether a resource has all required tags and at least 2 optional tags
+- **Tag Coverage**: Count of tags present on a resource displayed as "X/5 tags" format (where X is the count of tags present, up to 5 total). Coverage calculation allows more than 5 tags total but rounds down to 5 for display purposes
+- **Compliance Status**: Boolean indicating whether a resource has all 3 required tags AND at least 2 optional tags (compliance requires exactly 3 required + at least 2 optional, even if resource has more than 5 tags total)
 - **Filter Criteria**: User-selected values for Provider, Type, or Region used to narrow the resource list
 - **Sort Criteria**: User-selected column and direction (ascending/descending) for organizing the resource list
 - **Bulk Operation**: Tag add/edit/remove operation applied to multiple selected resources simultaneously
@@ -269,12 +311,12 @@ Each task group should be implemented in separate commits with backend and front
    - Commit 8: Frontend - Implement sortable column headers and integration
 
 5. **Edit Tags on Resource Detail Page**
-   - Commit 9: Backend - Implement POST /api/resources/:id/tag and DELETE /api/resources/:id/tag endpoints
-   - Commit 10: Frontend - Implement tag editing UI on resource detail page
+   - Commit 9: Backend - Implement POST /api/resources/:id/tag and DELETE /api/resources/:id/tag endpoints (ensure DELETE endpoint works correctly)
+   - Commit 10: Frontend - Implement tag editing UI on resource detail page with popovers (like filters) showing all tags split into Required and Optional groups
 
 6. **Bulk Edit Tags on Resource List**
-   - Commit 11: Backend - Implement POST /api/resources/bulk/tag and DELETE /api/resources/bulk/tag endpoints
-   - Commit 12: Frontend - Implement bulk edit UI and sheet component
+   - Commit 11: Backend - Implement POST /api/resources/bulk/tag and DELETE /api/resources/bulk/tag endpoints (ensure DELETE endpoint works correctly)
+   - Commit 12: Frontend - Implement bulk edit UI with combined "Add/Edit Tag" button, popovers showing tags split into Required/Optional groups, and immediate preview display as user edits values
 
 ### Dependencies
 
@@ -288,7 +330,7 @@ Each task group should be implemented in separate commits with backend and front
 
 - All 20 resources from seed data will be displayed without pagination
 - Tag validation follows the schema defined in SPEC.md (required tags: Environment, Owner, BusinessUnit; optional tags: CostCenter, Project, Customer)
-- Compliance definition: Resource is compliant if it has all 3 required tags AND at least 2 optional tags
+- Compliance definition: Resource is compliant if it has all 3 required tags AND at least 2 optional tags. Resources can have more than 5 tags total, but coverage badge displays "X/5 tags" (rounding down to 5 for display). Compliance still requires exactly 3 required + at least 2 optional tags regardless of total tag count
 - Resource data is stored in-memory (no database persistence required for MVP)
 - No authentication/authorization required for MVP
 - Single user scenario (no concurrent editing conflicts to resolve)

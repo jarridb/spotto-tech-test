@@ -17,10 +17,10 @@
 
 **Purpose**: Set up shared types, seed data, and tag schema that all user stories depend on
 
-- [ ] T001 Create shared types and enums in types/src/index.ts (Provider, ResourceType, Environment, BusinessUnit, Tags, TagKey, Resource, ResourceWithCoverage, TagCoverage, CoverageStats, and all API models)
-- [ ] T002 Create seed data with 20 mock resources in backend/src/data/seed-data.ts
-- [ ] T003 Create in-memory storage functions in backend/src/data/resources.ts (getAllResources, getResourceById, updateResource)
-- [ ] T004 Create tag schema definition in backend/src/data/tag-schema.ts (required and optional tags with allowed values)
+- [X] T001 Create shared types and enums in types/src/index.ts (Provider, ResourceType, Environment, BusinessUnit, Tags, TagKey, Resource, ResourceWithCoverage, TagCoverage, CoverageStats, and all API models)
+- [X] T002 Create seed data with 20 mock resources in backend/src/data/seed-data.ts
+- [X] T003 Create in-memory storage functions in backend/src/data/resources.ts (getAllResources, getResourceById, updateResource)
+- [X] T004 Create tag schema definition in backend/src/data/tag-schema.ts (required and optional tags with allowed values) - Note: Implemented as backend/src/schemas/tag-schemas.ts
 
 **Checkpoint**: Shared types, seed data, and tag schema ready - foundational work can begin
 
@@ -32,13 +32,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create coverage calculation service in backend/src/services/coverage-service.ts (calculateResourceCoverage, isCompliant, addCoverageToResource functions)
-- [ ] T006 Create tag validation service in backend/src/services/tag-service.ts (validateTags, validateTagValue functions)
-- [ ] T007 Create resource service in backend/src/services/resource-service.ts (filtering and sorting logic functions)
-- [ ] T008 Create Zod schemas for request/response validation in backend/src/schemas/resource-schemas.ts
-- [ ] T009 Create Zod schemas for tag validation in backend/src/schemas/tag-schemas.ts
-- [ ] T010 Create Zod schemas for query parameters in backend/src/schemas/query-schemas.ts
-- [ ] T011 Create API client configuration in frontend/src/lib/api-client.ts (base URL, error handling, response parsing)
+- [X] T005 Create coverage calculation service in backend/src/services/coverage-service.ts (calculateResourceCoverage, isCompliant, addCoverageToResource functions)
+- [X] T006 Create tag validation service in backend/src/services/tag-service.ts (validateTags, validateTagValue functions)
+- [X] T006a [P] Create unit tests for tag validation service in backend/src/services/tag-service.test.ts (test validateTags with valid/invalid enum values, empty strings, test validateTagValue for all tag types, test isValidTagKey)
+- [X] T007 Create resource service in backend/src/services/resource-service.ts (filtering and sorting logic functions)
+- [X] T008 Create Zod schemas for request/response validation in backend/src/schemas/resource-schemas.ts
+- [X] T009 Create Zod schemas for tag validation in backend/src/schemas/tag-schemas.ts
+- [X] T010 Create Zod schemas for query parameters in backend/src/schemas/query-schemas.ts
+- [X] T011 Create API client configuration in frontend/src/lib/api-client.ts (base URL, error handling, response parsing)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -52,24 +53,26 @@
 
 ### Backend Implementation (Commit 1)
 
-- [ ] T012 [US1] Create GET /api/resources route handler in backend/src/routes/resources.ts (returns all resources with tag coverage)
-- [ ] T013 [US1] Integrate coverage service in GET /api/resources endpoint to add tagCoverage to each resource
-- [ ] T014 [US1] Add error handling middleware for GET /api/resources endpoint in backend/src/routes/resources.ts
-- [ ] T015 [US1] Register resources routes in backend/src/index.ts
+- [X] T012 [US1] Create GET /api/resources route handler in backend/src/routes/resources.ts (returns all resources with tag coverage)
+- [X] T013 [US1] Integrate coverage service in GET /api/resources endpoint to add tagCoverage to each resource
+- [X] T014 [US1] Add error handling middleware for GET /api/resources endpoint in backend/src/routes/resources.ts
+- [X] T015 [US1] Register resources routes in backend/src/index.ts
+- [X] T015a [US1] [P] Add API endpoint tests for GET /api/resources in backend/src/routes/resources.test.ts (test list endpoint returns resources with coverage, test filtering, test sorting)
 
 ### Frontend Implementation (Commit 2)
 
-- [ ] T016 [US1] Create API fetch function for GET /api/resources in frontend/src/features/resources/services/api.ts
-- [ ] T017 [US1] Create TanStack Query hook for resources list in frontend/src/features/resources/services/queries.ts (useResources hook)
-- [ ] T018 [US1] Create resource table component in frontend/src/features/resources/components/resource-table.tsx (table structure with all 13 columns)
-- [ ] T019 [US1] Create resource row component in frontend/src/features/resources/components/resource-row.tsx (individual table row)
-- [ ] T020 [US1] Create tag coverage badge component in frontend/src/features/resources/components/tag-coverage-badge.tsx (displays "X/Y required tags" format)
-- [ ] T021 [US1] Create main resource list component in frontend/src/features/resources/components/resource-list.tsx (orchestrates table, loading, error states)
-- [ ] T022 [US1] Update resources index route in frontend/src/routes/resources.index.tsx to render ResourceList component
-- [ ] T023 [US1] Add checkboxes (select all header checkbox and individual row checkboxes) in frontend/src/features/resources/components/resource-table.tsx
-- [ ] T024 [US1] Implement empty state component in frontend/src/features/resources/components/resource-list.tsx (displays when no resources match filters)
-- [ ] T025 [US1] Implement loading state in frontend/src/features/resources/components/resource-list.tsx
-- [ ] T026 [US1] Implement error state in frontend/src/features/resources/components/resource-list.tsx
+- [X] T016 [US1] Create API fetch function for GET /api/resources in frontend/src/features/resources/services/api.ts
+- [X] T017 [US1] Create TanStack Query hook for resources list in frontend/src/features/resources/services/queries.ts (useResources hook)
+- [X] T018 [US1] Create resource table component in frontend/src/features/resources/components/resource-table.tsx (table structure with all 13 columns)
+- [X] T019 [US1] Create resource row component in frontend/src/features/resources/components/resource-row.tsx (individual table row)
+- [X] T020 [US1] Create tag coverage badge component in frontend/src/features/resources/components/tag-coverage-badge.tsx (displays "X/Y required tags" format)
+- [X] T021 [US1] Create main resource list component in frontend/src/features/resources/components/resource-list.tsx (orchestrates table, loading, error states)
+- [X] T022 [US1] Update resources index route in frontend/src/routes/resources.index.tsx to render ResourceList component
+- [X] T023 [US1] Add checkboxes (select all header checkbox and individual row checkboxes) in frontend/src/features/resources/components/resource-table.tsx
+- [X] T024 [US1] Implement empty state component in frontend/src/features/resources/components/resource-list.tsx (displays when no resources match filters)
+- [X] T025 [US1] Implement loading state in frontend/src/features/resources/components/resource-list.tsx
+- [X] T026 [US1] Implement error state in frontend/src/features/resources/components/resource-list.tsx
+- [X] T026a [US1] [P] Create component test for ResourceList in frontend/src/features/resources/components/resource-list.test.tsx (test rendering, loading state, error state, resource display)
 
 **Checkpoint**: User Story 1 should be fully functional - all 20 resources display in table with tag coverage badges
 
@@ -83,20 +86,20 @@
 
 ### Backend Implementation (Commit 3)
 
-- [ ] T027 [US2] Create GET /api/resources/:id route handler in backend/src/routes/resources.ts (returns single resource by ID)
-- [ ] T028 [US2] Add 404 error handling for non-existent resource IDs in backend/src/routes/resources.ts
-- [ ] T029 [US2] Add error handling middleware for GET /api/resources/:id endpoint
+- [X] T027 [US2] Create GET /api/resources/:id route handler in backend/src/routes/resources.ts (returns single resource by ID)
+- [X] T028 [US2] Add 404 error handling for non-existent resource IDs in backend/src/routes/resources.ts
+- [X] T029 [US2] Add error handling middleware for GET /api/resources/:id endpoint
 
 ### Frontend Implementation (Commit 4)
 
-- [ ] T030 [US2] Create API fetch function for GET /api/resources/:id in frontend/src/features/resources/services/api.ts
-- [ ] T031 [US2] Create TanStack Query hook for single resource in frontend/src/features/resources/services/queries.ts (useResource hook)
-- [ ] T032 [US2] Create resource detail component in frontend/src/features/resources/components/resource-detail.tsx (main detail view container)
-- [ ] T033 [US2] Create resource properties card component in frontend/src/features/resources/components/resource-properties-card.tsx (displays Name, ID, Provider, Type, Region, Monthly Cost)
-- [ ] T034 [US2] Create resource tags card component in frontend/src/features/resources/components/resource-tags-card.tsx (displays Required Tags and Optional Tags sections)
-- [ ] T035 [US2] Add back navigation button in frontend/src/features/resources/components/resource-detail.tsx
-- [ ] T036 [US2] Update resources detail route in frontend/src/routes/resources.$id.tsx to render ResourceDetail component
-- [ ] T037 [US2] Add click handler to resource rows in frontend/src/features/resources/components/resource-row.tsx to navigate to detail page
+- [X] T030 [US2] Create API fetch function for GET /api/resources/:id in frontend/src/features/resources/services/api.ts
+- [X] T031 [US2] Create TanStack Query hook for single resource in frontend/src/features/resources/services/queries.ts (useResource hook)
+- [X] T032 [US2] Create resource detail component in frontend/src/features/resources/components/resource-detail.tsx (main detail view container)
+- [X] T033 [US2] Create resource properties card component in frontend/src/features/resources/components/resource-properties-card.tsx (displays Name, ID, Provider, Type, Region, Monthly Cost)
+- [X] T034 [US2] Create resource tags card component in frontend/src/features/resources/components/resource-tags-card.tsx (displays Required Tags and Optional Tags sections)
+- [X] T035 [US2] Add back navigation button in frontend/src/features/resources/components/resource-detail.tsx
+- [X] T036 [US2] Update resources detail route in frontend/src/routes/resources.$id.tsx to render ResourceDetail component
+- [X] T037 [US2] Add click handler to resource rows in frontend/src/features/resources/components/resource-row.tsx to navigate to detail page
 
 **Checkpoint**: User Story 2 should be fully functional - clicking a resource navigates to detail page showing all properties and tags
 
@@ -110,21 +113,21 @@
 
 ### Backend Implementation (Commit 5)
 
-- [ ] T038 [US3] Add filtering logic to resource service in backend/src/services/resource-service.ts (filterByProvider, filterByType, filterByRegion functions)
-- [ ] T039 [US3] Update GET /api/resources endpoint to accept filter query parameters (provider, type, region) in backend/src/routes/resources.ts
-- [ ] T040 [US3] Integrate filtering logic into GET /api/resources endpoint handler
-- [ ] T041 [US3] Add validation for filter query parameters using Zod schemas in backend/src/routes/resources.ts
+- [X] T038 [US3] Add filtering logic to resource service in backend/src/services/resource-service.ts (filterByProvider, filterByType, filterByRegion functions)
+- [X] T039 [US3] Update GET /api/resources endpoint to accept filter query parameters (provider, type, region) in backend/src/routes/resources.ts
+- [X] T040 [US3] Integrate filtering logic into GET /api/resources endpoint handler
+- [X] T041 [US3] Add validation for filter query parameters using Zod schemas in backend/src/routes/resources.ts
 
 ### Frontend Implementation (Commit 6)
 
-- [ ] T042 [US3] Create filter state management hook in frontend/src/features/resources/hooks/use-resource-filters.ts
-- [ ] T043 [US3] Create resource filters component in frontend/src/features/resources/components/resource-filters.tsx (filter buttons with popovers)
-- [ ] T044 [US3] Create filter badges component in frontend/src/features/resources/components/filter-badges.tsx (displays active filters with X icons)
-- [ ] T045 [US3] Integrate filter state with useResources query hook in frontend/src/features/resources/services/queries.ts
-- [ ] T046 [US3] Update resource list component to display filter UI in frontend/src/features/resources/components/resource-list.tsx
-- [ ] T047 [US3] Implement "Remove filters" button in filter popover footer in frontend/src/features/resources/components/resource-filters.tsx
-- [ ] T048 [US3] Dynamically populate Region filter values from resources data in frontend/src/features/resources/components/resource-filters.tsx
-- [ ] T049 [US3] Update empty state to show "Clear filters" action when filters are active in frontend/src/features/resources/components/resource-list.tsx
+- [X] T042 [US3] Create filter state management hook in frontend/src/features/resources/hooks/use-resource-filters.ts
+- [X] T043 [US3] Create resource filters component in frontend/src/features/resources/components/resource-filters.tsx (filter buttons with popovers)
+- [X] T044 [US3] Create filter badges component in frontend/src/features/resources/components/filter-badges.tsx (displays active filters with X icons)
+- [X] T045 [US3] Integrate filter state with useResources query hook in frontend/src/features/resources/services/queries.ts
+- [X] T046 [US3] Update resource list component to display filter UI in frontend/src/features/resources/components/resource-list.tsx
+- [X] T047 [US3] Implement "Remove filters" button in filter popover footer in frontend/src/features/resources/components/resource-filters.tsx
+- [X] T048 [US3] Dynamically populate Region filter values from resources data in frontend/src/features/resources/components/resource-filters.tsx
+- [X] T049 [US3] Update empty state to show "Clear filters" action when filters are active in frontend/src/features/resources/components/resource-list.tsx
 
 **Checkpoint**: User Story 3 should be fully functional - filters work correctly, badges display, and empty state shows when no matches
 
@@ -138,19 +141,19 @@
 
 ### Backend Implementation (Commit 7)
 
-- [ ] T050 [US4] Add sorting logic to resource service in backend/src/services/resource-service.ts (sortByName, sortByProvider, sortByMonthlyCost functions)
-- [ ] T051 [US4] Update GET /api/resources endpoint to accept sort query parameters (sortBy, sortOrder) in backend/src/routes/resources.ts
-- [ ] T052 [US4] Integrate sorting logic into GET /api/resources endpoint handler
-- [ ] T053 [US4] Add validation for sort query parameters using Zod schemas in backend/src/routes/resources.ts
+- [X] T050 [US4] Add sorting logic to resource service in backend/src/services/resource-service.ts (sortByName, sortByProvider, sortByMonthlyCost functions)
+- [X] T051 [US4] Update GET /api/resources endpoint to accept sort query parameters (sortBy, sortOrder) in backend/src/routes/resources.ts
+- [X] T052 [US4] Integrate sorting logic into GET /api/resources endpoint handler
+- [X] T053 [US4] Add validation for sort query parameters using Zod schemas in backend/src/routes/resources.ts
 
 ### Frontend Implementation (Commit 8)
 
-- [ ] T054 [US4] Create sort state management hook in frontend/src/features/resources/hooks/use-resource-sort.ts
-- [ ] T055 [US4] Add sortable column headers to resource table in frontend/src/features/resources/components/resource-table.tsx (Name, Provider, Monthly Cost columns)
-- [ ] T056 [US4] Add visual sort indicators (arrows) to sortable column headers in frontend/src/features/resources/components/resource-table.tsx
-- [ ] T057 [US4] Implement sort toggle functionality (clicking same column toggles asc/desc) in frontend/src/features/resources/components/resource-table.tsx
-- [ ] T058 [US4] Integrate sort state with useResources query hook in frontend/src/features/resources/services/queries.ts
-- [ ] T059 [US4] Ensure sort state persists when filters are applied/removed in frontend/src/features/resources/hooks/use-resource-sort.ts
+- [X] T054 [US4] Create sort state management hook in frontend/src/features/resources/hooks/use-resource-sort.ts
+- [X] T055 [US4] Add sortable column headers to resource table in frontend/src/features/resources/components/resource-table.tsx (Name, Provider, Monthly Cost columns)
+- [X] T056 [US4] Add visual sort indicators (arrows) to sortable column headers in frontend/src/features/resources/components/resource-table.tsx
+- [X] T057 [US4] Implement sort toggle functionality (clicking same column toggles asc/desc) in frontend/src/features/resources/components/resource-table.tsx
+- [X] T058 [US4] Integrate sort state with useResources query hook in frontend/src/features/resources/services/queries.ts
+- [X] T059 [US4] Ensure sort state persists when filters are applied/removed in frontend/src/features/resources/hooks/use-resource-sort.ts
 
 **Checkpoint**: User Story 4 should be fully functional - sorting works for Name, Provider, and Monthly Cost columns with visual indicators
 
@@ -164,23 +167,24 @@
 
 ### Backend Implementation (Commit 9)
 
-- [ ] T060 [US5] Create POST /api/resources/:id/tag route handler in backend/src/routes/resources.ts (adds or edits single tag)
-- [ ] T061 [US5] Create DELETE /api/resources/:id/tag route handler in backend/src/routes/resources.ts (removes single tag)
-- [ ] T062 [US5] Integrate tag validation service into POST /api/resources/:id/tag endpoint
-- [ ] T063 [US5] Add validation error responses for invalid tag keys/values in backend/src/routes/resources.ts
-- [ ] T064 [US5] Update resource in-memory storage when tags are added/edited/removed in backend/src/data/resources.ts
+- [X] T060 [US5] Create POST /api/resources/:id/tag route handler in backend/src/routes/resources.ts (adds or edits single tag) - Note: Implemented as PATCH /api/resources/:id/tags
+- [X] T061 [US5] Create DELETE /api/resources/:id/tag route handler in backend/src/routes/resources.ts (removes single tag) - Note: Implemented as DELETE /api/resources/:id/tags/:tagKey
+- [X] T062 [US5] Integrate tag validation service into POST /api/resources/:id/tag endpoint
+- [X] T063 [US5] Add validation error responses for invalid tag keys/values in backend/src/routes/resources.ts
+- [X] T064 [US5] Update resource in-memory storage when tags are added/edited/removed in backend/src/data/resources.ts
+- [X] T064a [US5] [P] Add API endpoint tests for tag operations in backend/src/routes/resources.test.ts (test PATCH /api/resources/:id/tags updates tags, test DELETE /api/resources/:id/tags/:tagKey removes tags, test validation errors)
 
 ### Frontend Implementation (Commit 10)
 
-- [ ] T065 [US5] Create API fetch functions for POST /api/resources/:id/tag and DELETE /api/resources/:id/tag in frontend/src/features/resources/services/api.ts
-- [ ] T066 [US5] Create TanStack Query mutations for tag operations in frontend/src/features/resources/services/mutations.ts (useAddEditResourceTag, useRemoveResourceTag hooks)
-- [ ] T067 [US5] Implement tag editing UI in resource tags card component in frontend/src/features/resources/components/resource-tags-card.tsx (edit mode with input field and Save button)
-- [ ] T068 [US5] Implement "Add value" button for missing required tags in frontend/src/features/resources/components/resource-tags-card.tsx
-- [ ] T069 [US5] Implement Remove button (X) for optional tags in frontend/src/features/resources/components/resource-tags-card.tsx
-- [ ] T070 [US5] Implement "Add tag" button and popover for optional tags in frontend/src/features/resources/components/resource-tags-card.tsx
-- [ ] T071 [US5] Add validation error display for invalid tag values in frontend/src/features/resources/components/resource-tags-card.tsx
-- [ ] T072 [US5] Implement optimistic updates and query invalidation after tag mutations in frontend/src/features/resources/services/mutations.ts
-- [ ] T073 [US5] Hide Remove button when tag is in edit mode in frontend/src/features/resources/components/resource-tags-card.tsx
+- [X] T065 [US5] Create API fetch functions for POST /api/resources/:id/tag and DELETE /api/resources/:id/tag in frontend/src/features/resources/services/api.ts - Note: Implemented via mutations.ts
+- [X] T066 [US5] Create TanStack Query mutations for tag operations in frontend/src/features/resources/services/mutations.ts (useAddEditResourceTag, useRemoveResourceTag hooks)
+- [X] T067 [US5] Implement tag editing UI in resource tags card component in frontend/src/features/resources/components/resource-tags-card.tsx (edit mode with input field and Save button)
+- [X] T068 [US5] Implement "Add value" button for missing required tags in frontend/src/features/resources/components/resource-tags-card.tsx
+- [X] T069 [US5] Implement Remove button (X) for optional tags in frontend/src/features/resources/components/resource-tags-card.tsx
+- [X] T070 [US5] Implement "Add tag" button and popover for optional tags in frontend/src/features/resources/components/resource-tags-card.tsx
+- [X] T071 [US5] Add validation error display for invalid tag values in frontend/src/features/resources/components/resource-tags-card.tsx
+- [X] T072 [US5] Implement optimistic updates and query invalidation after tag mutations in frontend/src/features/resources/services/mutations.ts
+- [X] T073 [US5] Hide Remove button when tag is in edit mode in frontend/src/features/resources/components/resource-tags-card.tsx
 
 **Checkpoint**: User Story 5 should be fully functional - tags can be added, edited, and removed on detail page with validation
 
@@ -194,27 +198,27 @@
 
 ### Backend Implementation (Commit 11)
 
-- [ ] T074 [US6] Create POST /api/resources/bulk/tag route handler in backend/src/routes/resources.ts (bulk add/edit tag with preview support)
-- [ ] T075 [US6] Create DELETE /api/resources/bulk/tag route handler in backend/src/routes/resources.ts (bulk remove tag with preview support)
-- [ ] T076 [US6] Implement preview mode logic for bulk operations in backend/src/routes/resources.ts (returns BulkTagPreview when preview=true)
-- [ ] T077 [US6] Implement bulk tag application logic in backend/src/routes/resources.ts (updates all resources when preview=false)
-- [ ] T078 [US6] Add validation for bulk operation request bodies using Zod schemas in backend/src/routes/resources.ts
-- [ ] T079 [US6] Add error handling for partial failures in bulk operations (returns BulkTagResponse with errors array)
+- [X] T074 [US6] Create POST /api/resources/bulk/tag route handler in backend/src/routes/resources.ts (bulk add/edit tag with preview support) - Note: Implemented as POST /api/resources/bulk-tag
+- [X] T075 [US6] Create DELETE /api/resources/bulk/tag route handler in backend/src/routes/resources.ts (bulk remove tag with preview support) - Note: Implemented as DELETE /api/resources/bulk-tag
+- [X] T076 [US6] Implement preview mode logic for bulk operations in backend/src/routes/resources.ts (returns BulkTagPreview when preview=true)
+- [X] T077 [US6] Implement bulk tag application logic in backend/src/routes/resources.ts (updates all resources when preview=false)
+- [X] T078 [US6] Add validation for bulk operation request bodies using Zod schemas in backend/src/routes/resources.ts
+- [X] T079 [US6] Add error handling for partial failures in bulk operations (returns BulkTagResponse with errors array)
 
 ### Frontend Implementation (Commit 12)
 
-- [ ] T080 [US6] Create API fetch functions for POST /api/resources/bulk/tag and DELETE /api/resources/bulk/tag in frontend/src/features/resources/services/api.ts
-- [ ] T081 [US6] Create TanStack Query mutations for bulk operations in frontend/src/features/resources/services/mutations.ts (useBulkAddEditTag, useBulkRemoveTag hooks)
-- [ ] T082 [US6] Implement selection state management in frontend/src/features/resources/components/resource-list.tsx (track selected resource IDs)
-- [ ] T083 [US6] Implement "Select all" checkbox functionality in frontend/src/features/resources/components/resource-table.tsx (selects only visible resources)
-- [ ] T084 [US6] Create bulk edit action buttons component in frontend/src/features/resources/components/resource-list.tsx (Add Tag, Edit Tag, Remove Tag buttons - appears when 2+ selected)
-- [ ] T085 [US6] Create bulk edit sheet component in frontend/src/features/resources/components/bulk-edit-sheet.tsx (sheet UI for bulk operations)
-- [ ] T086 [US6] Implement tag dropdown logic in bulk edit sheet (shows appropriate tags based on operation type) in frontend/src/features/resources/components/bulk-edit-sheet.tsx
-- [ ] T087 [US6] Implement single input field for tag value in bulk edit sheet in frontend/src/features/resources/components/bulk-edit-sheet.tsx
-- [ ] T088 [US6] Implement preview display in bulk edit sheet (shows each resource's current and new tags) in frontend/src/features/resources/components/bulk-edit-sheet.tsx
-- [ ] T089 [US6] Implement summary messages in bulk edit sheet (shows how many resources will be updated) in frontend/src/features/resources/components/bulk-edit-sheet.tsx
-- [ ] T090 [US6] Implement Apply and Cancel actions in bulk edit sheet in frontend/src/features/resources/components/bulk-edit-sheet.tsx
-- [ ] T091 [US6] Implement query invalidation after bulk operations to refresh resource list in frontend/src/features/resources/services/mutations.ts
+- [X] T080 [US6] Create API fetch functions for POST /api/resources/bulk/tag and DELETE /api/resources/bulk/tag in frontend/src/features/resources/services/api.ts - Note: Implemented via mutations.ts
+- [X] T081 [US6] Create TanStack Query mutations for bulk operations in frontend/src/features/resources/services/mutations.ts (useBulkAddEditTag, useBulkRemoveTag hooks)
+- [X] T082 [US6] Implement selection state management in frontend/src/features/resources/components/resource-list.tsx (track selected resource IDs)
+- [X] T083 [US6] Implement "Select all" checkbox functionality in frontend/src/features/resources/components/resource-table.tsx (selects only visible resources)
+- [X] T084 [US6] Create bulk edit action buttons component in frontend/src/features/resources/components/resource-list.tsx (Add Tag, Edit Tag, Remove Tag buttons - appears when 2+ selected)
+- [X] T085 [US6] Create bulk edit sheet component in frontend/src/features/resources/components/bulk-edit-sheet.tsx (sheet UI for bulk operations)
+- [X] T086 [US6] Implement tag dropdown logic in bulk edit sheet (shows appropriate tags based on operation type) in frontend/src/features/resources/components/bulk-edit-sheet.tsx
+- [X] T087 [US6] Implement single input field for tag value in bulk edit sheet in frontend/src/features/resources/components/bulk-edit-sheet.tsx
+- [X] T088 [US6] Implement preview display in bulk edit sheet (shows each resource's current and new tags) in frontend/src/features/resources/components/bulk-edit-sheet.tsx
+- [X] T089 [US6] Implement summary messages in bulk edit sheet (shows how many resources will be updated) in frontend/src/features/resources/components/bulk-edit-sheet.tsx
+- [X] T090 [US6] Implement Apply and Cancel actions in bulk edit sheet in frontend/src/features/resources/components/bulk-edit-sheet.tsx
+- [X] T091 [US6] Implement query invalidation after bulk operations to refresh resource list in frontend/src/features/resources/services/mutations.ts
 
 **Checkpoint**: User Story 6 should be fully functional - bulk tag operations work with preview mode and apply to all selected resources
 
