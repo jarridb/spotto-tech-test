@@ -30,7 +30,6 @@
 **Result:** Updated Spec.md
 **Time Saved:** ~1 hour
 
-
 ### 4. Refine spec.md
 
 **Prompt:** 'Review the spec.md and refine it and flesh out the details'
@@ -72,3 +71,10 @@
 **Tool:** Cursor
 **Result:** Updated instructions, cors setup, vite setup, added .env example
 **Time Saved:** ~30 min
+
+### 7. Build the dashboard
+
+**Prompt:** '/speckit.implement 003-dashbaord. Setup required files, config and a basic hello world for the application. Prompt me to continue or request prompts to change'
+**Tool:** Cursor
+**Result:** Updated Spec.md
+**Time Saved:** ~4 hour
